@@ -1,0 +1,2457 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Basic Page Info -->
+  <title>Zether - Decentralized Social Platform</title>
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <meta name="description" content="Zether is a decentralized, adminless social platform built entirely on a single smart contract—no servers, no moderators, and no censorship." />
+  <meta name="keywords" content="Zether, blockchain, decentralized, social media, no censorship, Web3" />
+  <meta name="author" content="Zether Team" />
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Zether">
+  <meta property="og:description" content="Zether is a decentralized, adminless social platform built entirely on a single smart contract — no servers, no moderators, and no censorship.">
+  <meta property="og:image" content="https://zether.org/img/card.png">
+  <meta property="og:url" content="https://zether.org/">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Zether">
+  <meta name="twitter:description" content="Zether is a decentralized, adminless social platform built entirely on a single smart contract — no servers, no moderators, and no censorship.">
+  <meta name="twitter:image" content="https://zether.org/img/card.png">
+  <meta name="twitter:site" content="@ZetherOrg">
+  <meta name="twitter:creator" content="@ZetherOrg">
+
+  <style>
+    /* ------------------- Reset & Base Styles ------------------- */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f8fa;
+      color: #14171a;
+      padding-bottom: 50px;
+    }
+    a {
+      color: #1da1f3;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: none;
+    }
+    button {
+      background: #1da1f3;
+      color: #fff;
+      padding: 3px 5px;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    p {
+      white-space: pre-line;
+    }
+    .commentTitle {
+      white-space: normal;
+    }
+
+    /* ------------------- Loader ------------------- */
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1da1f3;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ------------------- Top Bar & Navigation ------------------- */
+    #topBar {
+      background: #1da1f3;
+      color: #fff;
+      padding: 12px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #topBar h1 {
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .hamburger {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: none;
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .connectSection {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .connectSection button {
+      background: #fff;
+      color: #1da1f3;
+      border: none;
+      padding: 6px 12px;
+      font-weight: 600;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .connectSection button:hover {
+      background: #e8f5fd;
+    }
+    #walletAddr {
+      font-size: 0.95rem;
+    }
+    #logoutBtn {
+      background: #fff;
+      color: #e0245e;
+      border: none;
+      padding: 6px 12px;
+      font-weight: 600;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #logoutBtn:hover {
+      background: #ffe6e6;
+    }
+
+    /* ------------------- Grid Layout ------------------- */
+    #layout {
+      display: grid;
+      justify-content: center;
+      grid-template-columns: 300px 0.7fr 300px;
+      gap: 20px;
+      padding: 20px;
+      margin-top: 1px;
+    }
+    @media (max-width: 1100px) {
+      #layout { grid-template-columns: auto; }
+    }
+    @media (max-width: 768px) {
+      #layout { grid-template-columns: 1fr; }
+      #sidebar { display: none; }
+    }
+
+    /* ------------------- Sidebar ------------------- */
+    #sidebar {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    #sidebar a {
+      display: block;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    #sidebar a:hover {
+      background: #e8f5fd;
+    }
+
+    /* ------------------- Main Content & Right Sidebar ------------------- */
+    #mainContent,
+    #rightSide {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    @media (max-width: 1100px) {
+      #mainContent, #rightSide, #sidebar {
+        width: 95vw;
+      }
+    }
+
+    /* ------------------- Search Section ------------------- */
+    #searchSection label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+    #searchInput {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccd6dd;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    #searchBtn {
+      background: #1da1f3;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      font-weight: 600;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    #searchBtn:hover {
+      background: #1991da;
+    }
+
+    /* ------------------- Panels ------------------- */
+    .panel {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .panel h2,
+    .panel h3 {
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    .panel input,
+    .panel textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccd6dd;
+      border-radius: 20px;
+      font-size: 1rem;
+    }
+    .panel button {
+      height: 40px;
+      background: #1da1f3;
+      color: #fff;
+      border: none;
+      padding: 10px 17px;
+      font-weight: 600;
+      border-radius: 17px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .panel button:hover {
+      background: #1991da;
+    }
+    .faqLinks a {
+      display: block;
+      margin: 10px 0;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .faqLinks a:hover {
+      color: #1991da;
+    }
+
+    /* ------------------- Settings Update Rows ------------------- */
+    .updateRow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .updateRow label {
+      min-width: 120px;
+      font-weight: 500;
+    }
+    .updateRow input, .updateRow textarea {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccd6dd;
+      border-radius: 20px;
+    }
+    @media (max-width: 768px) {
+      .updateRow {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .updateRow label {
+        margin-bottom: 5px;
+      }
+    }
+
+    /* ------------------- Message Box ------------------- */
+    #messageBox {
+      position: relative;
+      display: none;
+      text-align: center;
+      padding: 15px 20px;
+      border-radius: 20px;
+      color: #fff;
+      font-weight: 600;
+      z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      align-items: center;
+    }
+    #messageCloseBtn {
+      position: absolute;
+      top: 12px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 17px;
+      background: #fff;
+      color: #000;
+      padding: 3px 7px;
+      cursor: pointer;
+    }
+
+    /* ------------------- Post Items ------------------- */
+    .postItem {
+      background: #fefefe;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #e1e8ed;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .postItem:hover {
+      background: #f5f8fa;
+      transform: translateY(-2px);
+    }
+    .postHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .authorInfo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .authorDetails {
+      display: flex;
+      flex-direction: column;
+    }
+    .authorName {
+      font-weight: 600;
+      color: #14171a;
+    }
+    .postDate {
+      font-size: 0.8rem;
+      color: #657786;
+    }
+    .postText {
+      font-size: 1rem;
+      margin: 7px 0;
+    }
+    .reactionRow {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .reactionBtn, .pinBtn {
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1px solid #ccd6dd;
+      transition: background 0.2s;
+      font-size: 1rem;
+    }
+    .reactionBtn:hover, .pinBtn:hover {
+      background: #e8f5fd;
+    }
+    .statsLine {
+      font-size: 0.9rem;
+      color: #657786;
+      margin-top: 8px;
+    }
+
+    /* ------------------- Comment Box ------------------- */
+    #commentBox {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    #commentText {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccd6dd;
+      border-radius: 20px;
+      font-size: 1rem;
+    }
+    #commentsPanel {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+
+    /* ------------------- Fallback Elements ------------------- */
+    .coverFallback {
+      background: #e1e8ed;
+      width: 100%;
+      height: 200px;
+      border-radius: 12px;
+    }
+    .avatarFallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #657786;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.9rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    /* ------------------- Profile Header ------------------- */
+    #profileHeader {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .coverContainer {
+      position: relative;
+    }
+    #coverPhoto, #myCoverPhoto {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .avatarContainer {
+      position: absolute;
+      bottom: -50px;
+      left: 20px;
+      width: 100px;
+      height: 100px;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #657786;
+    }
+    .avatarContainer img, .avatarContainer .avatarFallback {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .postAvatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #e1e8ed;
+    }
+    #nicknameLine, #myNicknameLine {
+      margin-top: 50px;
+      margin-bottom: auto;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #14171a;
+    }
+    #usernameLine, #bioLine, #locationLine, #websiteLine, #joinedDate,
+    #myUsernameLine, #myBioLine, #myLocationLine, #myWebsiteLine, #myStats {
+      color: #657786;
+      margin-top: 7px;
+      font-size: 1rem;
+      white-space: normal;
+    }
+    #followBtn {
+      background: #1da1f3;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      border-radius: 20px;
+      margin-top: 12px;
+      transition: background 0.2s;
+    }
+    #followBtn:hover {
+      background: #1991da;
+    }
+    #followerStats {
+      margin-top: 8px;
+      color: #657786;
+      font-size: 0.95rem;
+    }
+
+    /* ------------------- Create Post Panel ------------------- */
+    #createPostPanel {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    #createPostPanel textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccd6dd;
+      border-radius: 20px;
+      font-size: 1rem;
+    }
+    #createPostPanel button {
+      margin-top: 10px;
+      height: 40px;
+      background: #1da1f3;
+      color: #fff;
+      border: none;
+      padding: 10px 17px;
+      font-weight: 600;
+      border-radius: 17px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #createPostPanel button:hover {
+      background: #1991da;
+    }
+
+    /* ------------------- Pinned Post Sections ------------------- */
+    #userPinnedPanel { display: none; }
+    #myPinnedPostPanel {
+      display: none;
+      margin-bottom: 20px;
+    }
+    #myPinnedPostPanel h3 {
+      margin-bottom: 10px;
+    }
+
+    /* ------------------- Profile Tabs ------------------- */
+    .profileTabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .profileTabs button {
+      flex: 1;
+      padding: 7px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      color: #707070;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 15px;
+    }
+    .profileTabs button.activeTab {
+      background: transparent;
+      color: #000;
+      border-bottom: 3px solid #1da1f3;
+      border-radius: 0;
+      font-weight: bold;
+      font-size: 17px;
+    }
+
+    /* ------------------- Route Pages ------------------- */
+    .routePage {
+      display: none;
+    }
+    #editPostPage,
+    #editCommentPage,
+    #repostPage {
+      padding: 20px;
+    }
+    #editPostPage textarea,
+    #editCommentPage textarea,
+    #repostPage textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccd6dd;
+      border-radius: 20px;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    /* ------------------- Post Options ------------------- */
+    .postOptions {
+      margin-top: 10px;
+    }
+    .postOptions button {
+      background: #1da1f3;
+      border: none;
+      border-radius: 7px;
+      padding: 3px 15px 3px 5px;
+      cursor: pointer;
+      margin-right: 5px;
+      transition: background 0.2s;
+    }
+    .postOptions button:hover {
+      background: #e8f5fd;
+      border: 1px solid #a9a9a9;
+      color: #000;
+    }
+
+    /* ------------------- Quoted Frame ------------------- */
+    .quotedFrame {
+      border-left: 3px solid #1da1f3;
+      margin: 10px 0 15px 0;
+      padding: 10px;
+      background: #f0f8ff;
+    }
+    .repostBlock {
+      /* You can adjust spacing here if needed */
+    }
+    .repostBlock p {
+      /* Adjust spacing for reposter note if needed */
+    }
+
+    /* ------------------- Share Modal ------------------- */
+    #shareModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #shareModal .modal-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+    #shareModal .modal-content {
+      position: relative;
+      background: #fff;
+      padding: 10px 20px 20px;
+      border-radius: 8px;
+      z-index: 10001;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 200px;
+    }
+    #shareModal .modal-content button {
+      margin: 5px 0;
+      width: 100%;
+      background: #1da1f3;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #shareModal .modal-content button:hover {
+      background: #1991da;
+    }
+    #shareModal .close-modal {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 17px;
+      background: none !important;
+      color: red !important;
+      font-weight: bold;
+      width: auto !important;
+    }
+    #shareModal .close-modal:hover {
+      color: #1991da;
+    }
+
+    /* ------------------- Reaction Highlight ------------------- */
+    .highlight {
+      background: #64acfc !important;
+    }
+
+    /* ------------------- Additional Classes ------------------- */
+    .activityItem {
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #1da1f3;
+      border-radius: 10px;
+    }
+    .activityItem p {
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+    .postHiddenMessage {
+      background: #f5f8fa;
+      padding: 10px;
+      font-style: italic;
+      color: #657786;
+      border: 1px solid #e1e8ed;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    .recentUser {
+      padding: 8px;
+      border-bottom: 1px solid #e1e8ed;
+    }
+
+    /* ------------------- Footer ------------------- */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #14171a;
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.9rem;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader Overlay -->
+  <div id="loader">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Top Bar -->
+  <div id="topBar">
+    <button id="menuLeftBtn" class="hamburger">&#9776;</button>
+    <h1>Zether - Decentralized Social Platform</h1>
+    <div class="connectSection">
+      <button id="connectBtn">Connect Wallet</button>
+      <span id="walletAddr"></span>
+      <button id="logoutBtn" style="display:none;">Logout</button>
+    </div>
+  </div>
+
+  <div id="layout">
+    <!-- Sidebar Navigation -->
+    <div id="sidebar">
+      <a href="#home">🏠 Home</a>
+      <a href="#profile">👤 My Profile</a>
+      <a href="faucet">💰 Faucet</a>
+      <a href="#settings">⚙️ Settings</a>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent">
+      <!-- Message Box -->
+      <div id="messageBox">
+        <button id="messageCloseBtn">X</button>
+        <span id="messageText"></span>
+      </div>
+
+      <!-- Home Route -->
+      <div class="routePage" id="homePage">
+        <div class="panel">
+          <h2>Recent Posts</h2>
+          <div id="homeFeed"></div>
+          <button id="homeLoadMoreBtn">Load More</button>
+        </div>
+      </div>
+
+      <!-- Single Post Route -->
+      <div class="routePage" id="postPage">
+        <div class="panel" id="postPanel"></div>
+        <div class="panel" id="commentFormPanel">
+          <h3>Write a Comment</h3>
+          <div id="commentBox">
+            <textarea id="commentText" rows="5" placeholder="Your comment..."></textarea>
+            <button id="commentBtn">Comment</button>
+          </div>
+        </div>
+        <div class="panel" id="commentsPanel"></div>
+      </div>
+
+      <!-- Public User Profile -->
+      <div class="routePage" id="userProfilePage">
+        <div id="profileHeader">
+          <div class="coverContainer">
+            <div id="coverFallback" class="coverFallback" style="display:none;"></div>
+            <img id="coverPhoto" src="" alt="Cover" style="display:none;" />
+            <div class="avatarContainer">
+              <div id="avatarFallback" class="avatarFallback" style="display:none;"></div>
+              <img id="profileAvatar" src="" alt="Avatar" style="display:none;" />
+            </div>
+          </div>
+          <div class="postHeader">
+            <div class="authorInfo">
+              <div class="authorDetails">
+                <span id="nicknameLine" class="authorName"></span>
+                <div id="usernameLine"></div>
+                <div id="postDate" class="postDate"></div>
+              </div>
+            </div>
+          </div>
+          <p id="bioLine"></p>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <p id="locationLine"></p>
+            <p id="websiteLine"></p>
+          </div>
+          <p id="followerStats"></p>
+          <p id="joinedDate"></p>
+          <button id="followBtn" style="display:none;"></button>
+        </div>
+        <div id="userPinnedPanel" class="panel" style="display:none;">
+          <h3>Pinned Post 📌</h3>
+          <div id="userPinnedContent"></div>
+        </div>
+        <!-- Profile Tabs -->
+        <div class="profileTabs" id="profileTabs">
+          <button id="profilePostsTab" class="activeTab" onclick="showUserPosts()">Posts</button>
+          <button id="profileCommentsTab" onclick="showUserComments()">Comments</button>
+        </div>
+        <div id="profilePostsSection">
+          <div id="userFeed"></div>
+          <button id="userLoadMoreBtn">Load More</button>
+        </div>
+        <div id="profileCommentsSection" style="display: none;">
+          <div id="userCommentsFeed"></div>
+        </div>
+      </div>
+
+      <!-- My Profile -->
+      <div class="routePage" id="myProfilePage">
+        <div id="myProfileHeader"></div>
+        <!-- Create Post Panel -->
+        <div id="createPostPanel" class="panel">
+          <h3>Create a Post</h3>
+          <textarea id="postContent" rows="5" placeholder="What's happening?"></textarea>
+          <button id="createPostBtn">Post</button>
+        </div>
+        <!-- Pinned Post Panel for My Profile -->
+        <div id="myPinnedPostPanel" class="panel" style="display: none;">
+          <h3>Pinned Post 📌</h3>
+          <div id="myPinnedPostContent"></div>
+        </div>
+        <!-- My Profile Tabs -->
+        <div class="profileTabs" id="myProfileTabs">
+          <button id="myProfilePostsTab" class="activeTab" onclick="showMyPosts()">Posts</button>
+          <button id="myProfileCommentsTab" onclick="showMyComments()">Comments</button>
+        </div>
+        <div id="myProfilePostsSection">
+          <div id="myPostsFeed"></div>
+          <button id="myLoadMoreBtn">Load More</button>
+        </div>
+        <div id="myProfileCommentsSection" style="display: none;">
+          <div id="myCommentsFeed"></div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="routePage" id="settingsPage">
+        <div class="panel" id="accountPanel">
+          <h2>Account</h2>
+          <p id="accountStatus">[Checking...]</p>
+        </div>
+        <div class="panel" id="profileUpdatesPanel">
+          <h2>Profile Updates</h2>
+          <div class="updateRow">
+            <label for="setNickname">Nickname</label>
+            <input type="text" id="setNickname" />
+            <button id="updateNicknameBtn">Update</button>
+          </div>
+          <div class="updateRow">
+            <label for="setAbout">About</label>
+            <textarea id="setAbout" rows="3"></textarea>
+            <button id="updateAboutBtn">Update</button>
+          </div>
+          <div class="updateRow">
+            <label for="setWebsite">Website 🌐</label>
+            <input type="text" id="setWebsite" />
+            <button id="updateWebsiteBtn">Update</button>
+          </div>
+          <div class="updateRow">
+            <label for="setLocation">Location</label>
+            <input type="text" id="setLocation" />
+            <button id="updateLocationBtn">Update</button>
+          </div>
+          <div class="updateRow">
+            <label for="setProfilePicture">Profile Pic (URL)</label>
+            <input type="text" id="setProfilePicture" />
+            <button id="updateProfilePictureBtn">Update</button>
+          </div>
+          <div class="updateRow">
+            <label for="setCoverPicture">Cover Pic (URL)</label>
+            <input type="text" id="setCoverPicture" />
+            <button id="updateCoverPictureBtn">Update</button>
+          </div>
+          <div class="updateRow">
+            <label for="setUsername">Change Username <small>(not recommended)</small></label>
+            <input type="text" id="setUsername" />
+            <button id="updateUsernameBtn">Update</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Routes: Edit Post, Edit Comment, Repost -->
+      <div class="routePage" id="editPostPage">
+        <div class="panel">
+          <h3>Edit Post</h3>
+          <textarea id="editPostContent" rows="5" placeholder="Edit your post..."></textarea>
+          <div id="originalPostQuote" class="quotedFrame" style="display:none;"></div>
+          <button id="saveEditPostBtn">Save</button>
+        </div>
+      </div>
+
+      <div class="routePage" id="editCommentPage">
+        <div class="panel">
+          <h3>Edit Comment</h3>
+          <textarea id="editCommentContent" rows="5" placeholder="Edit your comment..."></textarea>
+          <button id="saveEditCommentBtn">Save</button>
+        </div>
+      </div>
+
+      <div class="routePage" id="repostPage">
+        <div class="panel">
+          <h3>Repost</h3>
+          <textarea id="repostContent" rows="2" placeholder="Add a comment (optional)"></textarea>
+          <div id="originalPostFrame" class="quotedFrame" style="margin-bottom:10px;"></div>
+          <button id="submitRepostBtn">Repost</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div id="rightSide">
+      <div id="searchSection">
+        <label>Search</label>
+        <input type="text" id="searchInput" placeholder="e.g. post123 or Zether" />
+        <button id="searchBtn">Go</button>
+      </div>
+      <div id="recentlyJoinedPanel" class="panel">
+        <h3>Recently Joined</h3>
+        <div id="recentlyJoinedContent"></div>
+      </div>
+      <div class="panel faqLinks" style="margin-top:20px;">
+        <h3>Resources</h3>
+        <a href="#zether">Zether Official</a>
+        <a href="blockchain" target="_blank">Zether Blockchain</a>
+        <a href="https://zether.forum/" target="_blank">Zether Forum</a>
+        <a href="bet" target="_blank">Zether Bets</a>
+        <a href="https://zthscan.com/" target="_blank">Block Explorer</a>
+        <a href="faq">FAQ</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 Zether. Crafted and developed by Zether. All rights reserved.
+  </footer>
+
+  <!-- External Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <script src="abi.js"></script>
+
+  <!-- ------------------- Engine Script ------------------- -->
+  <script>
+    /* =================== Helper Functions =================== */
+    function safeAddEventListener(id, event, handler) {
+      const el = document.getElementById(id);
+      if (el) { el.addEventListener(event, handler); }
+    }
+    function refreshPage() {
+      window.location.reload();
+    }
+    function getAvatarHTML(author) {
+      if (author.profilePic && author.profilePic.trim() !== "") {
+        return `<img class="postAvatar" src="${author.profilePic}" alt="Avatar" onerror="this.onerror=null;this.style.display='none';" />`;
+      } else {
+        return `<div class="avatarFallback">${author.displayName ? author.displayName.charAt(0).toUpperCase() : '?'}</div>`;
+      }
+    }
+    function linkify(text) {
+      if (!text) return "";
+      const urlRegex = /(\b(https?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]))/ig;
+      return text.replace(urlRegex, function(url) {
+        return `<a href="${url}" target="_blank">${url}</a>`;
+      });
+    }
+    function showLoader() { document.getElementById('loader').style.display = 'flex'; }
+    function hideLoader() { document.getElementById('loader').style.display = 'none'; }
+    function formatTimestamp(ts) { return new Date(ts * 1000).toLocaleString('en-GB'); }
+    function formatTimestampZ(ts) { return new Date(ts * 1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }); }
+    function shortAddress(addr) { return addr ? addr.slice(0,6) + "..." + addr.slice(-4) : ""; }
+    function showMessage(msg, isError) {
+      const box = document.getElementById("messageBox");
+      box.style.backgroundColor = isError ? "#e0245e" : "#17bf63";
+      document.getElementById("messageText").textContent = msg;
+      box.style.display = "block";
+    }
+    function hideMessage() { document.getElementById("messageBox").style.display = "none"; }
+
+    /* =================== Configuration Constants =================== */
+    const CONTRACT_ADDRESS = "0xCF7cD887E1a6f39D2389cE4a961aAFe26A10B0a1";
+    const ZETHER_CHAIN = {
+      chainId: "0xAE97B",
+      chainName: "Zether Mainnet",
+      nativeCurrency: { name: "ZTH", symbol: "ZTH", decimals: 18 },
+      rpcUrls: ["https://rpc.zether.org/"],
+      blockExplorerUrls: ["https://zthscan.com/"]
+    };
+
+    /* =================== Global Variables =================== */
+    let readOnlyWeb3, readOnlyContract;
+    let userWeb3, userContract;
+    let userAccount = null;
+    let isRegistered = false;
+    let homeCurrentPostCursor = 0, userCurrentPostCursor = 0, myCurrentPostCursor = 0;
+    let currentPostId = 0, currentUsername = "";
+    let currentProfileUserAddr = null; // for public profile
+    const userProfileCache = {};
+    let currentCommentIndex = 0;
+    const commentBatchSize = 10;
+
+
+    /* =================== Initialization =================== */
+    window.addEventListener('DOMContentLoaded', async () => {
+      initUI();
+      initReadOnlyWeb3();
+      hideLoader();
+      if (window.ethereum) {
+        try {
+          const accts = await window.ethereum.request({ method: 'eth_accounts' });
+          if (accts.length > 0) {
+            userAccount = accts[0];
+            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+            if (chainId.toLowerCase() !== ZETHER_CHAIN.chainId.toLowerCase()) await trySwitchChain();
+            await initUserWeb3();
+            document.getElementById("connectBtn").style.display = "none";
+            document.getElementById("walletAddr").textContent = shortAddress(userAccount);
+            await checkRegistration();
+            document.getElementById("logoutBtn").style.display = "inline-block";
+            if (isRegistered) loadPinnedPost();
+          }
+        } catch(e) { console.log("Auto-connect error:", e); }
+      }
+      loadRecentlyJoined();
+      window.addEventListener('hashchange', handleRouting);
+      handleRouting();
+    });
+
+    /* =================== UI Initialization =================== */
+    function initUI() {
+      safeAddEventListener("messageCloseBtn", "click", hideMessage);
+      safeAddEventListener("connectBtn", "click", connectWallet);
+      safeAddEventListener("homeLoadMoreBtn", "click", loadOlderHomePosts);
+      safeAddEventListener("commentBtn", "click", createCommentOnPost);
+      safeAddEventListener("createPostBtn", "click", createNewPost);
+      safeAddEventListener("updateUsernameBtn", "click", updateUsername);
+      safeAddEventListener("updateNicknameBtn", "click", updateNickname);
+      safeAddEventListener("updateAboutBtn", "click", updateAbout);
+      safeAddEventListener("updateWebsiteBtn", "click", updateWebsite);
+      safeAddEventListener("updateLocationBtn", "click", updateLocation);
+      safeAddEventListener("updateProfilePictureBtn", "click", updateProfilePicture);
+      safeAddEventListener("updateCoverPictureBtn", "click", updateCoverPicture);
+      safeAddEventListener("searchBtn", "click", doSearch);
+      safeAddEventListener("menuLeftBtn", "click", () => {
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar) { sidebar.style.display = (sidebar.style.display === "block") ? "none" : "block"; }
+      });
+      safeAddEventListener("logoutBtn", "click", () => {
+        userAccount = null; isRegistered = false;
+        document.getElementById("walletAddr").textContent = "";
+        document.getElementById("logoutBtn").style.display = "none";
+        document.getElementById("connectBtn").style.display = "inline-block";
+        showMessage("Logged out.", false);
+      });
+    }
+
+    /* =================== Search =================== */
+    function doSearch() {
+      const val = document.getElementById("searchInput").value.trim();
+      if (!val) return;
+      window.location.hash = val.toLowerCase().startsWith("post")
+        ? "post" + val.replace(/[^0-9]/g, "")
+        : val;
+    }
+
+    /* =================== Routing =================== */
+    function handleRouting() {
+      const rawHash = window.location.hash;
+      const deepLinkRegex = /^#post(\d+)(?:\/#comment(\d+))?$/;
+      const match = rawHash.match(deepLinkRegex);
+      if (match) {
+        const postId = match[1];
+        const commentId = match[2];
+        document.querySelectorAll(".routePage").forEach(r => r.style.display = "none");
+        document.getElementById("postPage").style.display = "block";
+        loadSinglePost(postId, commentId).then(() => {
+          if (commentId) {
+            setTimeout(() => {
+              const commentElem = document.getElementById("comment-" + commentId);
+              if (commentElem) {
+                commentElem.scrollIntoView({ behavior: "smooth", block: "center" });
+                commentElem.classList.add("highlight");
+                setTimeout(() => commentElem.classList.remove("highlight"), 1000);
+              }
+            }, 500);
+          }
+        });
+        return;
+      }
+      const hash = rawHash.replace("#", "");
+      document.querySelectorAll(".routePage").forEach(r => r.style.display = "none");
+      if (!hash || hash === "home") {
+        document.getElementById("homePage").style.display = "block";
+        loadHomeFeed();
+      } else if (hash.startsWith("editpost-")) {
+        document.getElementById("editPostPage").style.display = "block";
+        loadEditPost(hash.split("-")[1]);
+      } else if (hash.startsWith("editcomment-")) {
+        document.getElementById("editCommentPage").style.display = "block";
+        let parts = hash.split("-");
+        loadEditComment(parts[1], parts[2]);
+      } else if (hash.startsWith("repost-")) {
+        document.getElementById("repostPage").style.display = "block";
+        loadRepost(hash.split("-")[1]);
+      } else if (hash === "profile") {
+        document.getElementById("myProfilePage").style.display = "block";
+        loadMyProfile();
+      } else if (hash === "settings") {
+        document.getElementById("settingsPage").style.display = "block";
+        loadSettings();
+      } else if (hash.startsWith("post")) {
+        document.getElementById("postPage").style.display = "block";
+        const postId = hash.split("/")[0].replace("post", "");
+        loadSinglePost(postId);
+      } else {
+        document.getElementById("userProfilePage").style.display = "block";
+        loadUserProfile(hash);
+      }
+    }
+
+    /* =================== Wallet & Contract Initialization =================== */
+    async function connectWallet() {
+      if (!window.ethereum) return showMessage("No Web3 wallet found. Install MetaMask.", true);
+      try {
+        const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (accts.length > 0) {
+          userAccount = accts[0];
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          if (chainId.toLowerCase() !== ZETHER_CHAIN.chainId.toLowerCase()) await trySwitchChain();
+          await initUserWeb3();
+          document.getElementById("connectBtn").style.display = "none";
+          document.getElementById("walletAddr").textContent = shortAddress(userAccount);
+          await checkRegistration();
+          showMessage("Wallet connected!", false);
+          refreshPage();
+          document.getElementById("logoutBtn").style.display = "inline-block";
+          handleRouting();
+        }
+      } catch(e) { showMessage("Connect error: " + e.message, true); }
+    }
+    function initReadOnlyWeb3() {
+      readOnlyWeb3 = new Web3(new Web3.providers.HttpProvider(ZETHER_CHAIN.rpcUrls[0]));
+      readOnlyContract = new readOnlyWeb3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+    }
+    async function initUserWeb3() {
+      userWeb3 = new Web3(window.ethereum);
+      userContract = new userWeb3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+    }
+    async function trySwitchChain() {
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: ZETHER_CHAIN.chainId }]
+        });
+      } catch(e) {
+        if (e.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [ZETHER_CHAIN]
+            });
+          } catch(err) { console.log("Add chain error:", err); }
+        } else { console.log("Switch chain error:", e); }
+      }
+    }
+    async function checkRegistration() {
+      if (!userWeb3 || !userAccount) return;
+      try {
+        isRegistered = await readOnlyContract.methods.isUserRegistered(userAccount).call();
+      } catch(e) { isRegistered = false; }
+    }
+
+    /* =================== Feed & Post Functions =================== */
+    async function loadHomeFeed() {
+      try {
+        showLoader();
+        const maxId = await readOnlyContract.methods.getGlobalPostCount().call();
+        homeCurrentPostCursor = parseInt(maxId, 10);
+        const feed = document.getElementById("homeFeed");
+        feed.innerHTML = "";
+        let visibleCount = 0, limit = 10;
+        while (visibleCount < limit && homeCurrentPostCursor > 0) {
+          try {
+            const post = await readOnlyContract.methods.getPost(homeCurrentPostCursor).call();
+            homeCurrentPostCursor--;
+            if (post[11]) continue;
+            visibleCount++;
+            const authorDisplay = await getUserDisplayName(post[1]);
+            const div = document.createElement("div");
+            div.className = "postItem";
+            div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
+            div.innerHTML = `
+              <div class="postHeader">
+                <div class="authorInfo">
+                  ${getAvatarHTML(authorDisplay)}
+                  <div class="authorDetails">
+                    <span class="authorName"><a href="#${encodeURIComponent(authorDisplay.usernameOnly || post[1])}" onclick="event.stopPropagation();">${authorDisplay.displayName}</a></span>
+                    <div class="postDate">${formatTimestamp(post[3])}</div>
+                  </div>
+                </div>
+                <div class="reactionRow">
+                  <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+                  <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                  <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+                </div>
+              </div>
+              <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+            `;
+            feed.appendChild(div);
+            checkPostReaction(post[0], div);
+          } catch(e) { console.log("Can't fetch post #", homeCurrentPostCursor, e); }
+        }
+        hideLoader();
+      } catch(e) { hideLoader(); showMessage("Failed to load home feed: " + e.message, true); }
+    }
+    async function loadOlderHomePosts() {
+      let visibleCount = 0, limit = 10;
+      const feed = document.getElementById("homeFeed");
+      while (visibleCount < limit && homeCurrentPostCursor > 0) {
+        try {
+          const post = await readOnlyContract.methods.getPost(homeCurrentPostCursor).call();
+          homeCurrentPostCursor--;
+          if (post[11]) continue;
+          visibleCount++;
+          const authorDisplay = await getUserDisplayName(post[1]);
+          const div = document.createElement("div");
+          div.className = "postItem";
+          div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
+          div.innerHTML = `
+            <div class="postHeader">
+              <div class="authorInfo">
+                ${getAvatarHTML(authorDisplay)}
+                <div class="authorDetails">
+                  <span class="authorName"><a href="#${encodeURIComponent(authorDisplay.usernameOnly || post[1])}" onclick="event.stopPropagation();">${authorDisplay.displayName}</a></span>
+                  <div class="postDate">${formatTimestamp(post[3])}</div>
+                </div>
+              </div>
+              <div class="reactionRow">
+                <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+                <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+              </div>
+            </div>
+            <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+          `;
+          feed.appendChild(div);
+          checkPostReaction(post[0], div);
+        } catch(e) { console.log("Error loading post #", homeCurrentPostCursor, e); }
+      }
+      if (homeCurrentPostCursor <= 0 && document.getElementById("homeLoadMoreBtn")) {
+        document.getElementById("homeLoadMoreBtn").style.display = "none";
+      }
+    }
+    async function loadSinglePost(postId, targetCommentId = null) {
+      currentPostId = postId;
+      document.getElementById("postPanel").innerHTML = "<p>Loading post...</p>";
+      document.getElementById("commentsPanel").innerHTML = "";
+      try {
+        const post = await readOnlyContract.methods.getPost(postId).call();
+        if (post[0] == 0) {
+          document.getElementById("postPanel").innerHTML = "<p>Post not found.</p>";
+          return;
+        }
+        if (post[11]) {
+          document.getElementById("postPanel").innerHTML = "<p>Post is hidden.</p>";
+          return;
+        }
+        const authorDisplay = await getUserDisplayName(post[1]);
+        let postContentHTML = "";
+        if (post[8]) {
+          postContentHTML = await renderRepost(post);
+        } else {
+          postContentHTML = linkify(post[7]);
+        }
+        // Build optionsHTML if the user owns the post and it is not hidden.
+        let optionsHTML = "";
+        if (userAccount && userAccount.toLowerCase() === post[1].toLowerCase() && !post[11]) {
+          if (post[0] === window.pinnedPostId) {
+            // If this post is the pinned post, show an "Unpin" button.
+            optionsHTML = `
+              <span class="reactionBtn" onclick="unpinMyPost(); event.stopPropagation();">📌 Unpin</span>
+            </div>`;
+          } else {
+            // Otherwise, show a "Pin" button.
+            optionsHTML = `
+              <span class="reactionBtn" onclick="pinMyPost(${post[0]}); event.stopPropagation();">📌 Pin</span>
+            </div>`;
+          }
+        }
+        document.getElementById("postPanel").innerHTML = `
+          <h3>Post #${postId}</h3>
+          <div onclick="window.location.hash='post${postId}'">
+            <div class="postItem">
+              <div class="postHeader">
+                <div class="authorInfo">
+                  ${getAvatarHTML(authorDisplay)}
+                  <div class="authorDetails">
+                    <span class="authorName"><a href="#${encodeURIComponent(authorDisplay.usernameOnly || post[1])}">${authorDisplay.displayName}</a></span>
+                    <div class="postDate">${formatTimestamp(post[3])}</div>
+                  </div>
+                </div>
+                <div class="reactionRow">
+                  <span class="reactionBtn like" onclick="reactToPost(${postId}, 'like')">👍</span>
+                  <span class="reactionBtn dislike" onclick="reactToPost(${postId}, 'dislike')">👎</span>
+                  <span class="reactionBtn shareBtn" onclick="showShareOptions(${postId}, event)">🔗</span>
+                  ${ (userAccount && userAccount.toLowerCase() === post[1].toLowerCase()) ?
+                    `<a class="reactionBtn edit" href="#editpost-${postId}">✏️</a>
+                     <span class="reactionBtn hide" onclick="toggleHidePost(${postId}, true); event.stopPropagation();">👁️</span>
+                     ${optionsHTML}` : ""
+                  }
+                </div>
+              </div>
+              <div class="postText"><p>${postContentHTML}</p></div>
+              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+            </div>
+          </div>
+        `;
+        checkPostReaction(postId, document.querySelector("#postPanel .postItem"));
+        // Now, instead of loading all comments, check if a target comment exists
+        if (targetCommentId) {
+          // Remove any infinite scroll listener if present.
+          // One quick way is to replace the element with a clone:
+          const oldPanel = document.getElementById("commentsPanel");
+          const newPanel = oldPanel.cloneNode(true);
+          oldPanel.parentNode.replaceChild(newPanel, oldPanel);
+    
+          // Now load only the single comment.
+          loadSingleComment(postId, targetCommentId);
+        } else {
+          loadComments(postId);
+        }
+      } catch(e) { document.getElementById("postPanel").innerHTML = "<p>Post not found.</p>"; }
+    }
+    async function loadSingleComment(postId, commentId) {
+      const commentsPanel = document.getElementById("commentsPanel");
+      commentsPanel.innerHTML = "<h3>Comment</h3>";
+      try {
+        const cData = await readOnlyContract.methods.getComment(postId, commentId).call();
+        if (cData[7]) {
+          commentsPanel.innerHTML += "<p>This comment is hidden.</p>";
+          return;
+        }
+        const authorDisplay = await getUserDisplayName(cData[3]);
+        let commentHTML = `
+          <div class="postItem" id="comment-${cData[1]}">
+            <div class="postHeader">
+              <div class="authorInfo">
+                ${getAvatarHTML(authorDisplay)}
+                <div class="authorDetails">
+                  <span class="authorName"><a href="#${authorDisplay.usernameOnly}">${authorDisplay.displayName}</a></span>
+                  <div class="postDate">${formatTimestamp(cData[6])}</div>
+                </div>
+              </div>
+              <div class="reactionRow">
+                <span class="reactionBtn like" onclick="reactToComment(${postId}, ${cData[1]}, 'like');">👍</span>
+                <span class="reactionBtn dislike" onclick="reactToComment(${postId}, ${cData[1]}, 'dislike');">👎</span>`;
+                if (userAccount && cData[3].toLowerCase() === userAccount.toLowerCase()) {
+                  commentHTML += `<a href="#editcomment-${postId}-${cData[1]}"><span class="reactionBtn">✏️</span></a>
+                  <span class="reactionBtn" onclick="toggleHideComment(${postId}, ${cData[1]}, true); event.stopPropagation();">👁️</span>`;
+                }
+        commentHTML += `
+              </div>
+            </div>
+            <div><p>${linkify(cData[2])}</p></div>
+            <div class="statsLine">Likes: ${cData[4]} | Dislikes: ${cData[5]}</div>
+          </div>
+        `;
+        commentsPanel.innerHTML += commentHTML;
+        const commentElem = document.getElementById("comment-" + cData[1]);
+        if (commentElem) {
+          checkCommentReaction(postId, cData[1], commentElem);
+        }
+      } catch (e) {
+        commentsPanel.innerHTML = "<p>Error loading comment.</p>";
+      }
+    }
+    async function loadComments(postId) {
+      const commentsPanel = document.getElementById("commentsPanel");
+      commentsPanel.innerHTML = "<h3>Comments</h3>";
+
+      const count = await readOnlyContract.methods.getPostCommentCount(postId).call();
+      const totalComments = parseInt(count, 10);
+      if (totalComments === 0) {
+        commentsPanel.innerHTML += "<p>No comments yet.</p>";
+        return;
+      }
+      // Initialize the pointer
+      currentCommentIndex = totalComments;
+      // Load the first batch of comments
+      await loadMoreComments(postId);
+
+      // Set up infinite scroll on the comments panel
+      commentsPanel.addEventListener("scroll", async function() {
+        if (commentsPanel.scrollTop + commentsPanel.clientHeight >= commentsPanel.scrollHeight - 50) {
+          await loadMoreComments(postId);
+        }
+      });
+    }
+    async function loadMoreComments(postId) {
+      const commentsPanel = document.getElementById("commentsPanel");
+      let loaded = 0;
+      while (loaded < commentBatchSize && currentCommentIndex > 0) {
+        try {
+          const cData = await readOnlyContract.methods.getComment(postId, currentCommentIndex).call();
+          currentCommentIndex--;
+          if (cData[7]) continue; // Skip hidden comments
+
+          const authorDisplay = await getUserDisplayName(cData[3]);
+          let commentHTML = `
+            <div onclick="window.location.hash='post${postId}/#comment${cData[1]}'">
+              <div class="postItem" id="comment-${cData[1]}">
+                <div class="postHeader">
+                  <div class="authorInfo">
+                    ${getAvatarHTML(authorDisplay)}
+                    <div class="authorDetails">
+                      <span class="authorName"><a href="#${authorDisplay.usernameOnly}">${authorDisplay.displayName}</a></span>
+                      <div class="postDate">${formatTimestamp(cData[6])}</div>
+                    </div>
+                  </div>
+                  <div class="reactionRow">
+                    <span class="reactionBtn" onclick="reactToComment(${postId}, ${cData[1]}, 'like'); event.stopPropagation();">👍</span>
+                    <span class="reactionBtn" onclick="reactToComment(${postId}, ${cData[1]}, 'dislike'); event.stopPropagation();">👎</span>`;
+                    if (userAccount && cData[3].toLowerCase() === userAccount.toLowerCase()) {
+                      commentHTML += `<a href="#editcomment-${postId}-${cData[1]}"><span class="reactionBtn">✏️</span></a>
+                      <span class="reactionBtn" onclick="toggleHideComment(${postId}, ${cData[1]}, true); event.stopPropagation();">👁️</span>`;
+                    }
+          commentHTML += `
+                  </div>
+                </div>
+                <div><p>${linkify(cData[2])}</p></div>
+                <div class="statsLine">Likes: ${cData[4]} | Dislikes: ${cData[5]}</div>
+              </div>
+            </div>
+          `;
+          commentsPanel.innerHTML += commentHTML;
+          const commentElem = document.getElementById("comment-" + cData[1]);
+          if (commentElem) {
+            checkCommentReaction(postId, cData[1], commentElem);
+          }
+          loaded++;
+        } catch (err) {
+          console.error("Error loading comment #", currentCommentIndex, err);
+          break;
+        }
+      }
+    }
+    async function createCommentOnPost() {
+      if (!userContract || !userAccount) return showMessage("Connect wallet to comment.", true);
+      if (!isRegistered) return showMessage("You must be registered to comment.", true);
+      const text = document.getElementById("commentText").value.trim();
+      if (!text) return showMessage("Comment is empty.", true);
+      try {
+        await userContract.methods.createComment(currentPostId, text).send({ from: userAccount });
+        showMessage("Comment posted!", false);
+        document.getElementById("commentText").value = "";
+        loadSinglePost(currentPostId);
+      } catch(e) { showMessage("Error creating comment: " + e.message, true); }
+    }
+    async function reactToPost(postId, reaction) {
+      if (!userContract || !userAccount)
+        return showMessage("Connect wallet to react.", true);
+      if (!isRegistered)
+        return showMessage("You must be registered to react.", true);
+      try {
+        const currentReaction = await readOnlyContract.methods.getUserReactionOnPost(postId, userAccount).call();
+        const newReaction = (currentReaction === reaction) ? "none" : reaction;
+        await userContract.methods.reactToPost(postId, newReaction).send({ from: userAccount });
+        showMessage("Post reaction updated!", false);
+        loadSinglePost(postId);
+      } catch (e) {
+        showMessage("Error reacting to post: " + e.message, true);
+      }
+    }
+    async function reactToComment(postId, commentId, reaction) {
+      if (!userContract || !userAccount)
+        return showMessage("Connect wallet to react.", true);
+      if (!isRegistered)
+        return showMessage("You must be registered to react.", true);
+      try {
+        const currentReaction = await readOnlyContract.methods.getUserReactionOnComment(postId, commentId, userAccount).call();
+        const newReaction = (currentReaction === reaction) ? "none" : reaction;
+        await userContract.methods.reactToComment(postId, commentId, newReaction).send({ from: userAccount });
+        showMessage("Comment reaction updated!", false);
+        loadSinglePost(postId);
+      } catch (e) {
+        showMessage("Error reacting to comment: " + e.message, true);
+      }
+    }
+    async function checkPostReaction(postId, container) {
+      if (!userAccount) return;
+      try {
+        const likeBtn = container.querySelector(".reactionBtn.like");
+        const dislikeBtn = container.querySelector(".reactionBtn.dislike");
+        if (likeBtn) likeBtn.classList.remove("highlight");
+        if (dislikeBtn) dislikeBtn.classList.remove("highlight");
+        const reaction = await readOnlyContract.methods.getUserReactionOnPost(postId, userAccount).call();
+        if (reaction === "like" && likeBtn) {
+          likeBtn.classList.add("highlight");
+        } else if (reaction === "dislike" && dislikeBtn) {
+          dislikeBtn.classList.add("highlight");
+        }
+      } catch(e) {
+        console.log(e);
+      }
+    }
+    async function checkCommentReaction(postId, commentId, container) {
+      if (!userAccount) return;
+      try {
+        const likeBtn = container.querySelector(".reactionBtn.like");
+        const dislikeBtn = container.querySelector(".reactionBtn.dislike");
+        if (likeBtn) likeBtn.classList.remove("highlight");
+        if (dislikeBtn) dislikeBtn.classList.remove("highlight");
+        const reaction = await readOnlyContract.methods.getUserReactionOnComment(postId, commentId, userAccount).call();
+        if (reaction === "like" && likeBtn) {
+          likeBtn.classList.add("highlight");
+        } else if (reaction === "dislike" && dislikeBtn) {
+          dislikeBtn.classList.add("highlight");
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    /* =================== Repost Block =================== */
+    async function renderRepost(post) {
+      let reposterNote = post[7].trim();
+      const reposterInfo = await getUserDisplayName(post[1]);
+      if (reposterNote === "") {
+        reposterNote = "User @" + reposterInfo.usernameOnly + " has reposted this:";
+      }
+      let originalPost = await readOnlyContract.methods.getPost(post[9]).call();
+      let originalAuthor = await getUserDisplayName(originalPost[1]);
+      let originalHTML = `
+        <a href="#post${post[9]}" style="text-decoration: none; color: #707070">
+          <div class="quotedFrame">
+            <div class="postHeader">
+              <div class="authorInfo">
+                ${getAvatarHTML(originalAuthor)}
+                <div class="authorDetails">
+                  <span class="authorName">${originalAuthor.displayName}</span>
+                  <div class="postDate">${formatTimestamp(originalPost[3])}</div>
+                </div>
+              </div>
+            </div>
+            <div class="postText"><p>${linkify(originalPost[7])}</p></div>
+            <div class="statsLine">Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]}</div>
+          </div>
+        </a>
+      `;
+      return `<div class="repostBlock">
+                <p><em>${reposterNote}</em></p>
+                ${originalHTML}
+              </div>`;
+    }
+
+    /* =================== Edit Functions =================== */
+    async function loadEditPost(postId) {
+      try {
+        const post = await readOnlyContract.methods.getPost(postId).call();
+        if (post[0] == 0 || post[11]) {
+          showMessage("Post not found or hidden.", true);
+          return;
+        }
+        if (post[8]) {
+          let reposterNote = post[7].trim();
+          if(reposterNote === "") {
+            const reposterInfo = await getUserDisplayName(post[1]);
+            reposterNote = "User @" + reposterInfo.usernameOnly + " has reposted this:";
+          }
+          document.getElementById("editPostContent").value = reposterNote;
+          let originalPost = await readOnlyContract.methods.getPost(post[9]).call();
+          let originalAuthor = await getUserDisplayName(originalPost[1]);
+          document.getElementById("originalPostQuote").innerHTML = `
+            <div class="postHeader">
+              <div class="authorInfo">
+                ${getAvatarHTML(originalAuthor)}
+                <div class="authorDetails">
+                  <span class="authorName"><a href="#${encodeURIComponent(originalAuthor.usernameOnly)}">${originalAuthor.displayName}</a></span>
+                  <div class="postDate">${formatTimestamp(originalPost[3])}</div>
+                </div>
+              </div>
+            </div>
+            <div class="postText"><p>${linkify(originalPost[7])}</p></div>
+            <div class="statsLine">Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]}</div>
+          `;
+          document.getElementById("originalPostQuote").style.display = "block";
+        } else {
+          document.getElementById("editPostContent").value = post[7];
+          document.getElementById("originalPostQuote").style.display = "none";
+        }
+      } catch(e) { showMessage("Error loading post for edit: " + e.message, true); }
+      safeAddEventListener("saveEditPostBtn", "click", async () => {
+        const newContent = document.getElementById("editPostContent").value.trim();
+        if (!newContent) {
+          showMessage("Post content cannot be empty.", true);
+          return;
+        }
+        try {
+          await userContract.methods.editPost(postId, newContent).send({ from: userAccount });
+          showMessage("Post updated.", false);
+          window.location.hash = "post" + postId;
+        } catch(e) { showMessage("Error editing post: " + e.message, true); }
+      });
+    }
+    async function loadEditComment(globalPostId, commentId) {
+      try {
+        const comment = await readOnlyContract.methods.getComment(globalPostId, commentId).call();
+        if(comment[0]==0 || comment[7]){
+          showMessage("Comment not found or hidden.", true);
+          return;
+        }
+        document.getElementById("editCommentContent").value = comment[2];
+      } catch(e) { showMessage("Error loading comment for edit: " + e.message, true); }
+      safeAddEventListener("saveEditCommentBtn", "click", async () => {
+        const newComment = document.getElementById("editCommentContent").value.trim();
+        if(!newComment){
+          showMessage("Comment cannot be empty.", true);
+          return;
+        }
+        try {
+          await userContract.methods.editComment(globalPostId, commentId, newComment).send({ from: userAccount });
+          showMessage("Comment updated.", false);
+          window.location.hash = "post" + globalPostId;
+        } catch(e) { showMessage("Error editing comment: " + e.message, true); }
+      });
+    }
+    async function loadRepost(postId) {
+      try {
+        const post = await readOnlyContract.methods.getPost(postId).call();
+        if(post[0]==0 || post[11]){
+          showMessage("Original post not found.", true);
+          return;
+        }
+        document.getElementById("originalPostFrame").innerHTML = `
+          <div class="postItem">
+            <div class="postHeader">
+              <div class="authorInfo">
+                ${getAvatarHTML(await getUserDisplayName(post[1]))}
+                <div class="authorDetails">
+                  <span class="authorName">${(await getUserDisplayName(post[1])).displayName}</span>
+                  <div class="postDate">${formatTimestamp(post[3])}</div>
+                </div>
+              </div>
+            </div>
+            <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+          </div>
+        `;
+      } catch(e) { showMessage("Error loading original post: " + e.message, true); }
+      safeAddEventListener("submitRepostBtn", "click", async () => {
+        const reposterContent = document.getElementById("repostContent").value.trim();
+        try {
+          await userContract.methods.createRepost(postId, reposterContent).send({ from: userAccount });
+          showMessage("Post reposted.", false);
+          window.location.hash = "post" + postId;
+        } catch(e) { showMessage("Error reposting: " + e.message, true); }
+      });
+    }
+
+    /* =================== Toggle Hide Functions =================== */
+    async function toggleHidePost(postId, hidden) {
+      try {
+        await userContract.methods.hidePost(postId, hidden).send({ from: userAccount });
+        showMessage(hidden ? "Post hidden." : "Post unhidden.", false);
+        if(window.location.hash.startsWith("post"))
+          loadSinglePost(postId);
+        else
+          loadMyPosts();
+      } catch(e) {
+        showMessage("Error toggling post visibility: " + e.message, true);
+      }
+    }
+    async function toggleHideComment(postId, commentId, hidden) {
+      try {
+        await userContract.methods.hideComment(postId, commentId, hidden).send({ from: userAccount });
+        showMessage(hidden ? "Comment hidden." : "Comment unhidden.", false);
+        loadSinglePost(postId);
+      } catch(e) {
+        showMessage("Error toggling comment visibility: " + e.message, true);
+      }
+    }
+
+    /* =================== Profile Tabs Functions =================== */
+    function showUserPosts() {
+      document.getElementById("profilePostsSection").style.display = "block";
+      document.getElementById("profileCommentsSection").style.display = "none";
+      document.getElementById("profilePostsTab").classList.add("activeTab");
+      document.getElementById("profileCommentsTab").classList.remove("activeTab");
+      reloadUserPosts();
+    }
+    function showUserComments() {
+      document.getElementById("profilePostsSection").style.display = "none";
+      document.getElementById("profileCommentsSection").style.display = "block";
+      document.getElementById("profileCommentsTab").classList.add("activeTab");
+      document.getElementById("profilePostsTab").classList.remove("activeTab");
+      if (currentProfileUserAddr)
+        loadProfileComments(currentProfileUserAddr, "userCommentsFeed");
+    }
+    function showMyPosts() {
+      document.getElementById("myProfilePostsSection").style.display = "block";
+      document.getElementById("myProfileCommentsSection").style.display = "none";
+      document.getElementById("myProfilePostsTab").classList.add("activeTab");
+      document.getElementById("myProfileCommentsTab").classList.remove("activeTab");
+      reloadMyPosts();
+    }
+    function showMyComments() {
+      document.getElementById("myProfilePostsSection").style.display = "none";
+      document.getElementById("myProfileCommentsSection").style.display = "block";
+      document.getElementById("myProfileCommentsTab").classList.add("activeTab");
+      document.getElementById("myProfilePostsTab").classList.remove("activeTab");
+      loadProfileComments(userAccount, "myCommentsFeed");
+    }
+    async function reloadUserPosts() {
+      const container = document.getElementById("userFeed");
+      container.innerHTML = "";
+      try {
+        const stats = await readOnlyContract.methods.getUserStats(currentProfileUserAddr).call();
+        userCurrentPostCursor = parseInt(stats[0], 10);
+        if (userCurrentPostCursor <= 0) {
+          container.innerHTML = "<p>No posts yet.</p><br>";
+        } else {
+          loadMoreUserPosts(currentProfileUserAddr);
+        }
+      } catch (e) { console.error("Error reloading user posts:", e); }
+    }
+    async function reloadMyPosts() {
+      const container = document.getElementById("myPostsFeed");
+      container.innerHTML = "";
+      try {
+        const stats = await readOnlyContract.methods.getUserStats(userAccount).call();
+        myCurrentPostCursor = parseInt(stats[0], 10);
+        if (myCurrentPostCursor <= 0) {
+          container.innerHTML = "<p>No posts yet.</p><br>";
+        } else {
+          loadMyPosts();
+        }
+      } catch (e) { console.error("Error reloading my posts:", e); }
+    }
+    async function loadProfileComments(userAddr, containerId) {
+      try {
+        const total = await readOnlyContract.methods.getUserCommentCount(userAddr).call();
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        let count = 0;
+        for (let i = total; i > 0 && count < 10; i--) {
+          let result = await readOnlyContract.methods.getUserComment(userAddr, i).call();
+          const globalPostId = result[0];
+          const commentId = result[1];
+          const commentData = await readOnlyContract.methods.getComment(globalPostId, commentId).call();
+          if (commentData[7]) continue;
+          const commenter = await getUserDisplayName(commentData[3]);
+          let commentHTML = `
+            <a href="#post${globalPostId}/#comment${commentId}" style="text-decoration:none; color:inherit;">
+              <p class="commentTitle">
+                <b>${commenter.displayName}</b>
+                has commented on post <span><b>#${globalPostId}</b></span>:
+              </p>
+              <p><i>${linkify(commentData[2])}</i></p>
+              <span style="font-size:0.8rem; color:#657786;">${formatTimestamp(commentData[6])}</span>
+            </a>
+          `;
+          const commentDiv = document.createElement("div");
+          commentDiv.className = "activityItem";
+          commentDiv.innerHTML = commentHTML;
+          container.appendChild(commentDiv);
+          count++;
+        }
+      } catch (e) { console.log("Error loading profile comments:", e); }
+    }
+
+    /* =================== User Profile Functions =================== */
+    async function loadUserProfile(username) {
+      const coverPhoto = document.getElementById("coverPhoto");
+      const coverFallback = document.getElementById("coverFallback");
+      coverPhoto.style.display = "none"; coverFallback.style.display = "none";
+      const avatarImg = document.getElementById("profileAvatar");
+      const avatarFallback = document.getElementById("avatarFallback");
+      avatarImg.style.display = "none"; avatarFallback.style.display = "none";
+      document.getElementById("nicknameLine").textContent = "";
+      document.getElementById("usernameLine").textContent = "";
+      document.getElementById("bioLine").textContent = "";
+      document.getElementById("locationLine").textContent = "";
+      document.getElementById("websiteLine").textContent = "";
+      document.getElementById("joinedDate").textContent = "";
+      document.getElementById("followerStats").textContent = "";
+      document.getElementById("userFeed").innerHTML = "";
+      document.getElementById("followBtn").style.display = "none";
+      try {
+        const userAddr = await readOnlyContract.methods.getUserAddressByUsername(username).call();
+        if (userAddr === "0x0000000000000000000000000000000000000000") {
+          document.getElementById("userFeed").innerHTML = "<p>User not found.</p>";
+          return;
+        }
+        currentProfileUserAddr = userAddr;
+        const basic = await readOnlyContract.methods.getUserBasic(userAddr).call();
+        const uname = basic[1];
+        const p = await readOnlyContract.methods.getUserProfile(userAddr).call();
+        const stats = await readOnlyContract.methods.getUserStats(userAddr).call();
+        document.getElementById("nicknameLine").textContent = p[0];
+        document.getElementById("usernameLine").textContent = "@" + uname;
+        if (p[1]) {
+            let aboutData = p[1];
+            document.getElementById("bioLine").textContent = aboutData;
+        }
+        if (p[3]) {
+            let locationData = p[3];
+            document.getElementById("locationLine").textContent = '📍 ' + locationData;
+        }
+        if (p[2]) {
+          let url = p[2];
+          if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
+          document.getElementById("websiteLine").innerHTML = '🌐 <a href="' + url + '" target="_blank">' + p[2] + '</a>';
+        }
+        document.getElementById("followerStats").textContent =
+          stats[0] + " Posts - " + stats[2] + " Followers - " + stats[3] + " Following";
+        const joinedTimestamp = parseInt(basic[2], 10) * 1000;
+        document.getElementById("joinedDate").textContent = "Joined " + new Date(joinedTimestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+        if (p[5]) { coverPhoto.src = p[5]; coverPhoto.style.display = "block"; }
+        else { coverFallback.style.display = "block"; }
+        if (p[4]) { avatarImg.src = p[4]; avatarImg.style.display = "block"; }
+        else {
+          avatarFallback.style.display = "flex";
+          avatarFallback.textContent = p[0] ? p[0].charAt(0).toUpperCase() : "?";
+        }
+        if (userAccount && userAccount.toLowerCase() !== userAddr.toLowerCase()) {
+          const followBtn = document.getElementById("followBtn");
+          followBtn.style.display = "inline-block";
+          const isF = await readOnlyContract.methods.getIsFollowing(userAccount, userAddr).call();
+          followBtn.textContent = isF ? "Unfollow" : "Follow";
+          followBtn.onclick = () => toggleFollow(userAddr, !isF);
+        }
+        if (parseInt(p[6], 10) > 0) {
+          const pinnedPost = await readOnlyContract.methods.getPost(p[6]).call();
+          document.getElementById("userPinnedContent").innerHTML = `
+            <div class="postItem" onclick="window.location.hash='post${pinnedPost[0]}'">
+              <div class="postHeader">
+                <div class="authorInfo">
+                    ${getAvatarHTML(await getUserDisplayName(userAddr))}
+                    <div class="authorDetails">
+                        <span class="authorName">${(await getUserDisplayName(userAddr)).displayName}</span>
+                        <div class="postDate">${formatTimestamp(pinnedPost[3])}</div>
+                    </div>
+                </div>
+                <div class="reactionRow">
+                    <span class="reactionBtn" onclick="reactToPost(${pinnedPost[0]}, 'like'); event.stopPropagation();">👍</span>
+                    <span class="reactionBtn" onclick="reactToPost(${pinnedPost[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                    <span class="reactionBtn" onclick="showShareOptions(${pinnedPost[0]}, event); event.stopPropagation();">🔗</span>
+                </div>
+              </div>
+              <div class="postText"><p>${linkify(pinnedPost[7])}</p></div>
+              <div class="statsLine">Likes: ${pinnedPost[5]} | Dislikes: ${pinnedPost[6]} | Comments: ${pinnedPost[4]}</div>
+            </div>
+          `;
+          document.getElementById("userPinnedPanel").style.display = "block";
+        } else {
+          document.getElementById("userPinnedPanel").style.display = "none";
+        }
+        document.getElementById("profilePostsSection").style.display = "block";
+        document.getElementById("profileCommentsSection").style.display = "none";
+        userCurrentPostCursor = parseInt(stats[0], 10);
+        if (userCurrentPostCursor <= 0) {
+          document.getElementById("userFeed").innerHTML = "<p>No posts yet.</p><br>";
+        } else {
+          loadMoreUserPosts(userAddr);
+          safeAddEventListener("userLoadMoreBtn", "load", function(){});
+          if(document.getElementById("userLoadMoreBtn"))
+            document.getElementById("userLoadMoreBtn").style.display = "inline-block";
+        }
+      } catch(e) {
+        document.getElementById("userFeed").innerHTML = "<p>Error loading user profile.</p>";
+        console.log(e);
+      }
+    }
+    async function loadMoreUserPosts(userAddr) {
+      let visibleCount = 0, limit = 10;
+      const feed = document.getElementById("userFeed");
+      while (visibleCount < limit && userCurrentPostCursor > 0) {
+        try {
+          const globalId = await readOnlyContract.methods.getGlobalPostId(userAddr, userCurrentPostCursor).call();
+          userCurrentPostCursor--;
+          const post = await readOnlyContract.methods.getPost(globalId).call();
+          if (post[11]) continue;
+          visibleCount++;
+          const div = document.createElement("div");
+          div.className = "postItem";
+          div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
+          const authorDisplay = await getUserDisplayName(post[1]);
+          div.innerHTML = `
+            <div class="postHeader">
+              <div class="authorInfo">
+                ${getAvatarHTML(authorDisplay)}
+                <div class="authorDetails">
+                  <span class="authorName"><a href="#${authorDisplay.usernameOnly}">${authorDisplay.displayName}</a></span>
+                  <div class="postDate">${formatTimestamp(post[3])}</div>
+                </div>
+              </div>
+              <div class="reactionRow">
+                <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+                <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+              </div>
+            </div>
+            <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+          `;
+          feed.appendChild(div);
+          checkPostReaction(post[0], div);
+        } catch(e) { console.log("Error loading user post #", userCurrentPostCursor, e); }
+      }
+      if (userCurrentPostCursor <= 0 && document.getElementById("userLoadMoreBtn")) {
+        document.getElementById("userLoadMoreBtn").style.display = "none";
+      }
+    }
+
+    /* =================== My Profile Functions =================== */
+    async function loadMyProfile() {
+      const header = document.getElementById("myProfileHeader");
+      const postsSection = document.getElementById("myProfilePostsSection");
+      const postInput = document.getElementById("postContent");
+      const postButton = document.getElementById("createPostBtn");
+
+      header.innerHTML = "";
+      if (!userAccount) {
+        header.innerHTML = `<div class="panel"><h2>Not Connected</h2><p>Please connect your wallet to see your profile.</p></div>`;
+        if(postInput) postInput.disabled = true;
+        if(postButton) {
+          postButton.textContent = "Connect Wallet";
+          postButton.onclick = connectWallet;
+        }
+        myProfileTabs.style.display = "none";
+        myProfilePostsSection.style.display = "none";
+        return;
+      }
+      if (!isRegistered) {
+        header.innerHTML = `
+          <div class="panel" id="registrationPanel">
+            <h2>Create an Account</h2>
+            <p>You must register before using your profile. Enter nickname + username below:</p><br/>
+            <input type="text" id="regNickname" placeholder="Nickname (your display name)" /><br/><br/>
+            <input type="text" id="regUsername" placeholder="Username (at least 5 characters)" /><br/><br/>
+            <button id="regNowBtn">Register</button>
+          </div>`;
+        safeAddEventListener("regNowBtn", "click", doRegister);
+        if(postInput) postInput.disabled = true;
+        if(postButton) {
+          postButton.textContent = "Create an account to post";
+          postButton.onclick = () => showMessage("Please register first.", true);
+        }
+        myProfileTabs.style.display = "none";
+        myProfilePostsSection.style.display = "none";
+        return;
+      }
+      try {
+        myProfileTabs.style.display = "flex";
+        myProfilePostsSection.style.display = "block";
+        const p = await userContract.methods.getUserProfile(userAccount).call();
+        const basic = await userContract.methods.getUserBasic(userAccount).call();
+        const username = basic[1];
+        currentUsername = username;
+        const pinnedPostId = p[6];
+        window.pinnedPostId = pinnedPostId;
+        header.innerHTML = `
+          <div class="panel" id="myProfileDisplay" style="position: relative;">
+            <div class="coverContainer">
+              ${p[5] ? `<img id="myCoverPhoto" src="${p[5]}" alt="My Cover">`
+                     : `<div id="myCoverFallback" class="coverFallback"></div>`}
+              <div class="avatarContainer">
+                ${p[4] ? `<img id="myProfileAvatar" src="${p[4]}" alt="My Avatar" style="background: #e1e7ed;">`
+                     : `<div id="myAvatarFallback" class="avatarFallback">${p[0].charAt(0).toUpperCase()}</div>`}
+              </div>
+              <button onclick="shareProfile()" style="height: auto; position: absolute; top: 10px; right: 10px; background: #1da1f3; color: #fff; border: none; padding: 5px 10px; border-radius: 7px; cursor: pointer; font-weight: 600;">Share Profile</button>
+            </div>
+            <h2 id="myNicknameLine">${p[0]}</h2>
+            <p id="myUsernameLine">@${username}</p>
+            <p id="myBioLine">${p[1] || ""}</p>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                ${p[3] ? `<p id="myLocationLine">📍 ${p[3]}</p>` : ""}
+                ${p[2] ? `<p id="myWebsiteLine">🌐 <a href="${p[2].startsWith("http") ? p[2] : "http://" + p[2]}" target="_blank">${p[2]}</a></p>` : ""}
+            </div>
+            <p id="myStats"></p>
+          </div>
+        `;
+        const stats = await readOnlyContract.methods.getUserStats(userAccount).call();
+        document.getElementById("myStats").textContent =
+          stats[0] + " Posts - " + stats[2] + " Followers - " + stats[3] + " Following | Joined: " + formatTimestampZ(basic[2]);
+        myCurrentPostCursor = parseInt(stats[0], 10);
+        loadPinnedPost();
+        document.getElementById("myProfilePostsSection").style.display = "block";
+        document.getElementById("myProfileCommentsSection").style.display = "none";
+        if (myCurrentPostCursor > 0) {
+          loadMyPosts();
+          safeAddEventListener("myLoadMoreBtn", "click", loadMyPosts);
+          if(document.getElementById("myLoadMoreBtn"))
+            document.getElementById("myLoadMoreBtn").style.display = "inline-block";
+        } else {
+          document.getElementById("myPostsFeed").innerHTML = "<p>No posts yet.</p><br>";
+        }
+        if(postInput) postInput.disabled = false;
+        if(postButton) postButton.textContent = "Post";
+      } catch(e) {
+        console.log("Error in loadMyProfile:", e);
+        showMessage("Couldn't load your profile data: " + e.message, true);
+      }
+    }
+    async function loadMyPosts() {
+      document.getElementById("myPostsFeed").innerHTML = "";
+      const feed = document.getElementById("myPostsFeed");
+      let limit = 10;
+      while (limit > 0 && myCurrentPostCursor > 0) {
+        try {
+          const globalId = await readOnlyContract.methods.getGlobalPostId(userAccount, myCurrentPostCursor).call();
+          const post = await readOnlyContract.methods.getPost(globalId).call();
+          const div = document.createElement("div");
+          div.className = "postItem";
+          div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
+          const myDisplay = await getUserDisplayName(userAccount);
+          let optionsHTML = "";
+          if (!post[11] && userAccount.toLowerCase() === post[1].toLowerCase()) {
+              if (post[0] === window.pinnedPostId) {
+                optionsHTML = `<div class="postOptions">
+                  <a href="#editpost-${post[0]}"><button>✏️ Edit</button></a>
+                  <button onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️ Hide</button>
+                  <button onclick="unpinMyPost(); event.stopPropagation();">📌 Unpin</button>
+                </div>`;
+              } else {
+                optionsHTML = `<div class="postOptions">
+                  <a href="#editpost-${post[0]}"><button>✏️ Edit</button></a>
+                  <button onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️ Hide</button>
+                  <button onclick="pinMyPost(${post[0]}); event.stopPropagation();">📌 Pin</button>
+                </div>`;
+              }
+          } else if(post[11]){
+            optionsHTML = `<div class="postHiddenMessage">
+              This post is hidden. <button onclick="toggleHidePost(${post[0]}, false); event.stopPropagation();">👀️ Unhide &nbsp;</button>
+            </div>`;
+          }
+          div.innerHTML = `
+              <div class="postHeader">
+                <div class="authorInfo">
+                  ${getAvatarHTML(myDisplay)}
+                  <div class="authorDetails">
+                    <span class="authorName">${myDisplay.displayName}</span>
+                    <div class="postDate">${formatTimestamp(post[3])}</div>
+                  </div>
+                </div>
+                <div class="reactionRow">
+                  <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+                  <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                  <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+                </div>
+              </div>
+              <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+              ${optionsHTML}
+          `;
+          checkPostReaction(post[0], div);
+          feed.appendChild(div);
+        } catch(e) { console.log("Error loading my post #", myCurrentPostCursor, e); }
+        myCurrentPostCursor--;
+        limit--;
+      }
+      if (myCurrentPostCursor <= 0 && document.getElementById("myLoadMoreBtn")) {
+        document.getElementById("myLoadMoreBtn").style.display = "none";
+      }
+    }
+    async function pinMyPost(postId) {
+      if (!userContract || !userAccount) return showMessage("Connect wallet to pin posts.", true);
+      try {
+        await userContract.methods.pinPost(postId).send({ from: userAccount });
+        showMessage("Post pinned.", false);
+        loadPinnedPost();
+      } catch(e) { showMessage("Error pinning post: " + e.message, true); }
+    }
+    async function unpinMyPost() {
+      if (!userContract || !userAccount)
+        return showMessage("Connect wallet to unpin posts.", true);
+        try {
+          await userContract.methods.pinPost(0).send({ from: userAccount });
+          showMessage("Post unpinned.", false);
+          loadPinnedPost();
+          reloadMyPosts();
+        } catch (e) {
+          showMessage("Error unpinning post: " + e.message, true);
+        }
+    }
+
+    async function loadPinnedPost() {
+      try {
+        const profile = await readOnlyContract.methods.getUserProfile(userAccount).call();
+        const pinnedId = parseInt(profile[6], 10);
+        if (pinnedId > 0) {
+          const post = await readOnlyContract.methods.getPost(pinnedId).call();
+          if (window.location.hash === "#profile" || window.location.hash === ""){
+            const container = document.getElementById("myPinnedPostContent");
+            if (container) {
+              container.innerHTML = `
+                <div class="postItem" onclick="window.location.hash='post${post[0]}'">
+                  <div class="postHeader">
+                    <div class="authorInfo">
+                      ${getAvatarHTML(await getUserDisplayName(userAccount))}
+                      <div class="authorDetails">
+                        <span class="authorName">${(await getUserDisplayName(userAccount)).displayName}</span>
+                        <div class="postDate">${formatTimestamp(post[3])}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="reactionRow">
+                    <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+                    <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                    <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+                  </div>
+                  <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+                  <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+                </div>
+              `;
+              document.getElementById("myPinnedPostPanel").style.display = "block";
+            }
+          } else {
+            const container = document.getElementById("userPinnedContent");
+            if (container) {
+              container.innerHTML = `
+                <div class="postItem" onclick="window.location.hash='post${post[0]}'">
+                  <div class="postHeader">
+                    <div class="authorInfo">
+                      ${getAvatarHTML(await getUserDisplayName(userAccount))}
+                      <div class="authorDetails">
+                        <span class="authorName">${(await getUserDisplayName(userAccount)).displayName}</span>
+                        <div class="postDate">${formatTimestamp(post[3])}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="reactionRow">
+                    <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+                    <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                    <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+                  </div>
+                  <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+                </div>
+              `;
+              document.getElementById("userPinnedPanel").style.display = "block";
+            }
+          }
+        } else {
+          if (document.getElementById("myPinnedPostPanel"))
+            document.getElementById("myPinnedPostPanel").style.display = "none";
+          if (document.getElementById("userPinnedPanel"))
+            document.getElementById("userPinnedPanel").style.display = "none";
+        }
+      } catch(e) { console.log("Error loading pinned post:", e); }
+    }
+    async function createNewPost() {
+      if (!userWeb3 || !userAccount) return showMessage("Connect wallet to create post.", true);
+      if (!isRegistered) return showMessage("You must be registered to create posts.", true);
+      const text = document.getElementById("postContent").value.trim();
+      if (!text) return showMessage("Post is empty!", true);
+      try {
+        await userContract.methods.createPost(text).send({ from: userAccount });
+        showMessage("Post created.", false);
+        document.getElementById("postContent").value = "";
+        const stats = await readOnlyContract.methods.getUserStats(userAccount).call();
+        myCurrentPostCursor = parseInt(stats[0], 10);
+        document.getElementById("myPostsFeed").innerHTML = "";
+        loadMyPosts();
+        loadPinnedPost();
+      } catch(e) { showMessage("Error creating post: " + e.message, true); }
+    }
+
+    /* =================== Settings Functions =================== */
+    function loadSettings() {
+      const statusLine = document.getElementById("accountStatus");
+      const updatesPanel = document.getElementById("profileUpdatesPanel");
+      if (!userAccount) {
+        statusLine.textContent = "Not connected.";
+        if (updatesPanel) updatesPanel.style.display = "none";
+        return;
+      }
+      if (!isRegistered) {
+        statusLine.innerHTML = `
+          You are NOT registered. <br/>
+          <div class="panel" id="registrationPanelSettings">
+            <h2>Register</h2>
+            <p>Please register to create your profile:</p>
+            <br>
+            <input type="text" id="regNickname" placeholder="Nickname (your display name)" /><br/><br/>
+            <input type="text" id="regUsername" placeholder="Username (at least 5 characters)" /><br/><br/>
+            <button id="regNowBtn">Register</button>
+          </div>
+        `;
+        if (updatesPanel) updatesPanel.style.display = "none";
+        safeAddEventListener("regNowBtn", "click", doRegister);
+      } else {
+        statusLine.textContent = "Customize your profile.";
+        if (updatesPanel) updatesPanel.style.display = "block";
+        prefillProfileFields();
+      }
+    }
+    async function doRegister() {
+      if (!userAccount) return;
+      const nn = document.getElementById("regNickname").value.trim();
+      const un = document.getElementById("regUsername").value.trim();
+      if (!nn || !un) return showMessage("Enter nickname & username", true);
+      if (un.length < 5) {
+        return showMessage("Username must be at least 5 characters long.", true);
+      }
+      const existingAddr = await readOnlyContract.methods.getUserAddressByUsername(un).call();
+      if (existingAddr !== "0x0000000000000000000000000000000000000000") return showMessage("Username already taken", true);
+      try {
+        await userContract.methods.createAccount(nn, un).send({ from: userAccount });
+        showMessage("Registration success!", false);
+        refreshPage();
+        isRegistered = true;
+        loadSettings();
+        loadMyProfile();
+      } catch(e) { showMessage("Register error: " + e.message, true); }
+    }
+    async function prefillProfileFields() {
+      try {
+        const p = await userContract.methods.getUserProfile(userAccount).call();
+        document.getElementById("setNickname").value = p[0];
+        document.getElementById("setAbout").value = p[1];
+        document.getElementById("setWebsite").value = p[2];
+        document.getElementById("setLocation").value = p[3];
+        document.getElementById("setProfilePicture").value = p[4];
+        document.getElementById("setCoverPicture").value = p[5];
+        const ub = await userContract.methods.getUserBasic(userAccount).call();
+        document.getElementById("setUsername").value = ub[1];
+      } catch(e) { console.log("Prefill error:", e); }
+    }
+    async function updateUsername() {
+      if (!isRegistered) return showMessage("Not registered", true);
+      const val = document.getElementById("setUsername").value.trim();
+      if (!val) return;
+      const existingAddr = await readOnlyContract.methods.getUserAddressByUsername(val).call();
+      if(existingAddr !== "0x0000000000000000000000000000000000000000") return showMessage("Username already taken", true);
+      try {
+        await userContract.methods.changeUsername(val).send({ from: userAccount });
+        showMessage("Username updated.", false);
+      } catch(e) { showMessage("Error: " + e.message, true); }
+    }
+    async function updateNickname() {
+      if (!isRegistered) return showMessage("Not registered", true);
+      const val = document.getElementById("setNickname").value.trim();
+      if (!val) return;
+      try {
+        await userContract.methods.updateNickname(val).send({ from: userAccount });
+        showMessage("Nickname updated.", false);
+      } catch(e) { showMessage("Error: " + e.message, true); }
+    }
+    async function updateAbout() {
+      if (!isRegistered) return showMessage("Not registered", true);
+      const val = document.getElementById("setAbout").value;
+      try {
+        await userContract.methods.updateAbout(val).send({ from: userAccount });
+        showMessage("About updated.", false);
+      } catch(e) { showMessage("Error: " + e.message, true); }
+    }
+    async function updateWebsite() {
+      if (!isRegistered) return showMessage("Not registered", true);
+      const val = document.getElementById("setWebsite").value.trim();
+      try {
+        await userContract.methods.updateWebsite(val).send({ from: userAccount });
+        showMessage("Website updated.", false);
+      } catch(e) { showMessage("Error: " + e.message, true); }
+    }
+    async function updateLocation() {
+      if (!isRegistered) return showMessage("Not registered", true);
+      const val = document.getElementById("setLocation").value.trim();
+      try {
+        await userContract.methods.updateLocation(val).send({ from: userAccount });
+        showMessage("Location updated.", false);
+      } catch(e) { showMessage("Error: " + e.message, true); }
+    }
+    async function updateProfilePicture() {
+      if (!isRegistered) return showMessage("Not registered", true);
+      const val = document.getElementById("setProfilePicture").value.trim();
+      try {
+        await userContract.methods.updateProfilePicture(val).send({ from: userAccount });
+        showMessage("Profile picture updated.", false);
+      } catch(e) { showMessage("Error: " + e.message, true); }
+    }
+    async function updateCoverPicture() {
+      if (!isRegistered) return showMessage("Not registered", true);
+      const val = document.getElementById("setCoverPicture").value.trim();
+      try {
+        await userContract.methods.updateCoverPicture(val).send({ from: userAccount });
+        showMessage("Cover picture updated.", false);
+      } catch(e) { showMessage("Error: " + e.message, true); }
+    }
+
+    /* =================== Utility Functions for Profiles =================== */
+    async function getUserDisplayName(addr) {
+      if (!addr) return { displayName: "" };
+      if (userProfileCache[addr]) return userProfileCache[addr];
+      try {
+        const basic = await readOnlyContract.methods.getUserBasic(addr).call();
+        const username = basic[1];
+        const p = await readOnlyContract.methods.getUserProfile(addr).call();
+        const display = `${p[0]} (@${username})`;
+        const obj = { displayName: display, usernameOnly: username, profilePic: p[4] };
+        userProfileCache[addr] = obj;
+        return obj;
+      } catch(e) {
+        const fallback = { displayName: shortAddress(addr), usernameOnly: null, profilePic: "" };
+        userProfileCache[addr] = fallback;
+        return fallback;
+      }
+    }
+    async function shareProfile() {
+      const shareHash = currentUsername ? "#" + currentUsername : "#profile";
+      const profileURL = window.location.origin + window.location.pathname + shareHash;
+      try {
+        await navigator.clipboard.writeText(profileURL);
+        alert("Profile link copied to clipboard:\n" + profileURL);
+      } catch (err) {
+        alert("Failed to copy profile link. Please copy it manually:\n" + profileURL);
+      }
+    }
+    async function toggleFollow(userAddr, follow) {
+      try {
+        await userContract.methods.followUser(userAddr, follow).send({ from: userAccount });
+        showMessage("Follow status updated.", false);
+        loadUserProfile((await getUserDisplayName(userAddr)).usernameOnly || userAddr);
+      } catch (err) {
+        showMessage("Error updating follow status: " + err.message, true);
+      }
+    }
+    async function loadRecentlyJoined() {
+      try {
+        const total = await readOnlyContract.methods.getTotalUsers().call();
+        const recentContainer = document.getElementById("recentlyJoinedContent");
+        recentContainer.innerHTML = "";
+        let count = 0;
+        for(let i = total; i > 0 && count < 5; i--) {
+          const addr = await readOnlyContract.methods.getUserAddressById(i).call();
+          if(addr === "0x0000000000000000000000000000000000000000") continue;
+          const user = await getUserDisplayName(addr);
+          const div = document.createElement("div");
+          div.className = "recentUser";
+          div.style.display = "flex";
+          div.style.alignItems = "center";
+          div.style.gap = "10px";
+          div.style.marginBottom = "7px";
+          div.innerHTML = `
+            <a href="#${user.usernameOnly ? user.usernameOnly : addr}" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;">
+              ${getAvatarHTML(user)}
+              <span>${user.displayName}</span>
+            </a>
+          `;
+          recentContainer.appendChild(div);
+          count++;
+        }
+      } catch(e) { console.log("Error loading recently joined:", e); }
+    }
+    async function loadRecentComments(userAddr) {
+      try {
+        const total = await readOnlyContract.methods.getUserCommentCount(userAddr).call();
+        const container = document.getElementById("recentComments");
+        container.innerHTML = "";
+        let count = 0;
+        for(let i = total; i > 0 && count < 10; i--) {
+          let result = await readOnlyContract.methods.getUserComment(userAddr, i).call();
+          const globalPostId = result[0];
+          const commentId = result[1];
+          const commentData = await readOnlyContract.methods.getComment(globalPostId, commentId).call();
+          if(commentData[7]) continue;
+          const commenter = await getUserDisplayName(commentData[3]);
+          let commentHTML = `
+            <p class="commentTitle">
+              <b>${commenter.displayName} (@${commenter.usernameOnly})</b>
+              has commented on post <a href="#post${globalPostId}">#${globalPostId}</a>:
+            </p>
+            <p><i>${linkify(commentData[2])}</i></p>
+            <span style="font-size:0.8rem; color:#657786;">${formatTimestamp(commentData[6])}</span>
+          `;
+          const commentDiv = document.createElement("div");
+          commentDiv.className = "activityItem";
+          commentDiv.innerHTML = commentHTML;
+          container.appendChild(commentDiv);
+          count++;
+        }
+      } catch(e) { console.log("Error loading recent comments:", e); }
+    }
+
+    /* =================== Share & Quote Modal Functions =================== */
+    function showShareOptions(postId, event) {
+      event.stopPropagation();
+      let existingModal = document.getElementById("shareModal");
+      if (existingModal) existingModal.remove();
+      let modal = document.createElement("div");
+      modal.id = "shareModal";
+      modal.innerHTML = `
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+          <h3>Share Post</h3>
+          <div class="share-buttons">
+             <button id="modalRepostOption">Repost</button>
+             <button id="modalShareLink">Share Link</button>
+          </div>
+          <button id="closeModal" class="close-modal">X</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      safeAddEventListener("modalRepostOption", "click", () => {
+        window.location.hash = "repost-" + postId;
+        closeShareModal();
+      });
+      safeAddEventListener("modalShareLink", "click", () => {
+        const postURL = window.location.origin + window.location.pathname + "#post" + postId;
+        navigator.clipboard.writeText(postURL).then(() => {
+          alert("Post link copied to clipboard:\n" + postURL);
+          closeShareModal();
+        });
+      });
+      safeAddEventListener("closeModal", "click", closeShareModal);
+      safeAddEventListener("shareModal", "click", (e) => {
+        if(e.target.classList.contains("modal-overlay")){
+          closeShareModal();
+        }
+      });
+    }
+    function closeShareModal() {
+      let modal = document.getElementById("shareModal");
+      if (modal) modal.remove();
+    }
+  </script>
+</body>
+</html>
