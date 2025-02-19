@@ -1015,8 +1015,12 @@
       blockExplorerUrls: ["https://zthscan.com/"]
     };
 
+    const rpcUrl1 = "https://rpc.zether.org/";
+    const rpcUrl2 = "https://rpc.zthscan.com/";
+
     /* =================== Global Variables =================== */
-    let readOnlyWeb3, readOnlyContract;
+    let readOnlyWeb3_1, readOnlyWeb3_2;
+    let readOnlyContract1, readOnlyContract2;
     let userWeb3, userContract;
     let userAccount = null;
     let isRegistered = false;
@@ -1167,8 +1171,11 @@
       } catch(e) { showMessage("Connect error: " + e.message, true); }
     }
     function initReadOnlyWeb3() {
-      readOnlyWeb3 = new Web3(new Web3.providers.HttpProvider(ZETHER_CHAIN.rpcUrls[0]));
-      readOnlyContract = new readOnlyWeb3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+      readOnlyWeb3_1 = new Web3(new Web3.providers.HttpProvider(rpcUrl1));
+      readOnlyContract1 = new readOnlyWeb3_1.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+      
+      readOnlyWeb3_2 = new Web3(new Web3.providers.HttpProvider(rpcUrl2));
+      readOnlyContract2 = new readOnlyWeb3_2.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
     }
     async function initUserWeb3() {
       userWeb3 = new Web3(window.ethereum);
@@ -1194,7 +1201,7 @@
     async function checkRegistration() {
       if (!userWeb3 || !userAccount) return;
       try {
-        isRegistered = await readOnlyContract.methods.isUserRegistered(userAccount).call();
+        isRegistered = await readOnlyContract1.methods.isUserRegistered(userAccount).call();
       } catch(e) { isRegistered = false; }
     }
 
@@ -1202,14 +1209,14 @@
     async function loadHomeFeed() {
       try {
         showLoader();
-        const maxId = await readOnlyContract.methods.getGlobalPostCount().call();
+        const maxId = await readOnlyContract1.methods.getGlobalPostCount().call();
         homeCurrentPostCursor = parseInt(maxId, 10);
         const feed = document.getElementById("homeFeed");
         feed.innerHTML = "";
         let visibleCount = 0, limit = 10;
         while (visibleCount < limit && homeCurrentPostCursor > 0) {
           try {
-            const post = await readOnlyContract.methods.getPost(homeCurrentPostCursor).call();
+            const post = await readOnlyContract1.methods.getPost(homeCurrentPostCursor).call();
             homeCurrentPostCursor--;
             if (post[11]) continue;
             visibleCount++;
@@ -1247,7 +1254,7 @@
       const feed = document.getElementById("homeFeed");
       while (visibleCount < limit && homeCurrentPostCursor > 0) {
         try {
-          const post = await readOnlyContract.methods.getPost(homeCurrentPostCursor).call();
+          const post = await readOnlyContract2.methods.getPost(homeCurrentPostCursor).call();
           homeCurrentPostCursor--;
           if (post[11]) continue;
           visibleCount++;
@@ -1286,7 +1293,7 @@
       document.getElementById("postPanel").innerHTML = "<p>Loading post...</p>";
       document.getElementById("commentsPanel").innerHTML = "";
       try {
-        const post = await readOnlyContract.methods.getPost(postId).call();
+        const post = await readOnlyContract1.methods.getPost(postId).call();
         if (post[0] == 0) {
           document.getElementById("postPanel").innerHTML = "<p>Post not found.</p>";
           return;
@@ -1365,7 +1372,7 @@
       const commentsPanel = document.getElementById("commentsPanel");
       commentsPanel.innerHTML = "<h3>Comment</h3>";
       try {
-        const cData = await readOnlyContract.methods.getComment(postId, commentId).call();
+        const cData = await readOnlyContract2.methods.getComment(postId, commentId).call();
         if (cData[7]) {
           commentsPanel.innerHTML += "<p>This comment is hidden.</p>";
           return;
@@ -1408,7 +1415,7 @@
       const commentsPanel = document.getElementById("commentsPanel");
       commentsPanel.innerHTML = "<h3>Comments</h3>";
 
-      const count = await readOnlyContract.methods.getPostCommentCount(postId).call();
+      const count = await readOnlyContract2.methods.getPostCommentCount(postId).call();
       const totalComments = parseInt(count, 10);
       if (totalComments === 0) {
         commentsPanel.innerHTML += "<p>No comments yet.</p>";
@@ -1431,7 +1438,7 @@
       let loaded = 0;
       while (loaded < commentBatchSize && currentCommentIndex > 0) {
         try {
-          const cData = await readOnlyContract.methods.getComment(postId, currentCommentIndex).call();
+          const cData = await readOnlyContract1.methods.getComment(postId, currentCommentIndex).call();
           currentCommentIndex--;
           if (cData[7]) continue; // Skip hidden comments
 
@@ -1492,7 +1499,7 @@
       if (!isRegistered)
         return showMessage("You must be registered to react.", true);
       try {
-        const currentReaction = await readOnlyContract.methods.getUserReactionOnPost(postId, userAccount).call();
+        const currentReaction = await readOnlyContract2.methods.getUserReactionOnPost(postId, userAccount).call();
         const newReaction = (currentReaction === reaction) ? "none" : reaction;
         await userContract.methods.reactToPost(postId, newReaction).send({ from: userAccount });
         showMessage("Post reaction updated!", false);
@@ -1507,7 +1514,7 @@
       if (!isRegistered)
         return showMessage("You must be registered to react.", true);
       try {
-        const currentReaction = await readOnlyContract.methods.getUserReactionOnComment(postId, commentId, userAccount).call();
+        const currentReaction = await readOnlyContract1.methods.getUserReactionOnComment(postId, commentId, userAccount).call();
         const newReaction = (currentReaction === reaction) ? "none" : reaction;
         await userContract.methods.reactToComment(postId, commentId, newReaction).send({ from: userAccount });
         showMessage("Comment reaction updated!", false);
@@ -1523,7 +1530,7 @@
         const dislikeBtn = container.querySelector(".reactionBtn.dislike");
         if (likeBtn) likeBtn.classList.remove("highlight");
         if (dislikeBtn) dislikeBtn.classList.remove("highlight");
-        const reaction = await readOnlyContract.methods.getUserReactionOnPost(postId, userAccount).call();
+        const reaction = await readOnlyContract2.methods.getUserReactionOnPost(postId, userAccount).call();
         if (reaction === "like" && likeBtn) {
           likeBtn.classList.add("highlight");
         } else if (reaction === "dislike" && dislikeBtn) {
@@ -1540,7 +1547,7 @@
         const dislikeBtn = container.querySelector(".reactionBtn.dislike");
         if (likeBtn) likeBtn.classList.remove("highlight");
         if (dislikeBtn) dislikeBtn.classList.remove("highlight");
-        const reaction = await readOnlyContract.methods.getUserReactionOnComment(postId, commentId, userAccount).call();
+        const reaction = await readOnlyContract2.methods.getUserReactionOnComment(postId, commentId, userAccount).call();
         if (reaction === "like" && likeBtn) {
           likeBtn.classList.add("highlight");
         } else if (reaction === "dislike" && dislikeBtn) {
@@ -1558,7 +1565,7 @@
       if (reposterNote === "") {
         reposterNote = "User @" + reposterInfo.usernameOnly + " has reposted this:";
       }
-      let originalPost = await readOnlyContract.methods.getPost(post[9]).call();
+      let originalPost = await readOnlyContract1.methods.getPost(post[9]).call();
       let originalAuthor = await getUserDisplayName(originalPost[1]);
       let originalHTML = `
         <a href="#post${post[9]}" style="text-decoration: none; color: #707070">
@@ -1586,7 +1593,7 @@
     /* =================== Edit Functions =================== */
     async function loadEditPost(postId) {
       try {
-        const post = await readOnlyContract.methods.getPost(postId).call();
+        const post = await readOnlyContract1.methods.getPost(postId).call();
         if (post[0] == 0 || post[11]) {
           showMessage("Post not found or hidden.", true);
           return;
@@ -1598,7 +1605,7 @@
             reposterNote = "User @" + reposterInfo.usernameOnly + " has reposted this:";
           }
           document.getElementById("editPostContent").value = reposterNote;
-          let originalPost = await readOnlyContract.methods.getPost(post[9]).call();
+          let originalPost = await readOnlyContract2.methods.getPost(post[9]).call();
           let originalAuthor = await getUserDisplayName(originalPost[1]);
           document.getElementById("originalPostQuote").innerHTML = `
             <div class="postHeader">
@@ -1634,7 +1641,7 @@
     }
     async function loadEditComment(globalPostId, commentId) {
       try {
-        const comment = await readOnlyContract.methods.getComment(globalPostId, commentId).call();
+        const comment = await readOnlyContract2.methods.getComment(globalPostId, commentId).call();
         if(comment[0]==0 || comment[7]){
           showMessage("Comment not found or hidden.", true);
           return;
@@ -1656,7 +1663,7 @@
     }
     async function loadRepost(postId) {
       try {
-        const post = await readOnlyContract.methods.getPost(postId).call();
+        const post = await readOnlyContract1.methods.getPost(postId).call();
         if(post[0]==0 || post[11]){
           showMessage("Original post not found.", true);
           return;
@@ -1744,7 +1751,7 @@
       const container = document.getElementById("userFeed");
       container.innerHTML = "";
       try {
-        const stats = await readOnlyContract.methods.getUserStats(currentProfileUserAddr).call();
+        const stats = await readOnlyContract2.methods.getUserStats(currentProfileUserAddr).call();
         userCurrentPostCursor = parseInt(stats[0], 10);
         if (userCurrentPostCursor <= 0) {
           container.innerHTML = "<p>No posts yet.</p><br>";
@@ -1757,7 +1764,7 @@
       const container = document.getElementById("myPostsFeed");
       container.innerHTML = "";
       try {
-        const stats = await readOnlyContract.methods.getUserStats(userAccount).call();
+        const stats = await readOnlyContract2.methods.getUserStats(userAccount).call();
         myCurrentPostCursor = parseInt(stats[0], 10);
         if (myCurrentPostCursor <= 0) {
           container.innerHTML = "<p>No posts yet.</p><br>";
@@ -1768,15 +1775,15 @@
     }
     async function loadProfileComments(userAddr, containerId) {
       try {
-        const total = await readOnlyContract.methods.getUserCommentCount(userAddr).call();
+        const total = await readOnlyContract2.methods.getUserCommentCount(userAddr).call();
         const container = document.getElementById(containerId);
         container.innerHTML = "";
         let count = 0;
         for (let i = total; i > 0 && count < 10; i--) {
-          let result = await readOnlyContract.methods.getUserComment(userAddr, i).call();
+          let result = await readOnlyContract1.methods.getUserComment(userAddr, i).call();
           const globalPostId = result[0];
           const commentId = result[1];
-          const commentData = await readOnlyContract.methods.getComment(globalPostId, commentId).call();
+          const commentData = await readOnlyContract2.methods.getComment(globalPostId, commentId).call();
           if (commentData[7]) continue;
           const commenter = await getUserDisplayName(commentData[3]);
           let commentHTML = `
@@ -1816,16 +1823,16 @@
       document.getElementById("userFeed").innerHTML = "";
       document.getElementById("followBtn").style.display = "none";
       try {
-        const userAddr = await readOnlyContract.methods.getUserAddressByUsername(username).call();
+        const userAddr = await readOnlyContract1.methods.getUserAddressByUsername(username).call();
         if (userAddr === "0x0000000000000000000000000000000000000000") {
           document.getElementById("userFeed").innerHTML = "<p>User not found.</p>";
           return;
         }
         currentProfileUserAddr = userAddr;
-        const basic = await readOnlyContract.methods.getUserBasic(userAddr).call();
+        const basic = await readOnlyContract2.methods.getUserBasic(userAddr).call();
         const uname = basic[1];
-        const p = await readOnlyContract.methods.getUserProfile(userAddr).call();
-        const stats = await readOnlyContract.methods.getUserStats(userAddr).call();
+        const p = await readOnlyContract1.methods.getUserProfile(userAddr).call();
+        const stats = await readOnlyContract2.methods.getUserStats(userAddr).call();
         document.getElementById("nicknameLine").textContent = p[0];
         document.getElementById("usernameLine").textContent = "@" + uname;
         if (p[1]) {
@@ -1855,12 +1862,12 @@
         if (userAccount && userAccount.toLowerCase() !== userAddr.toLowerCase()) {
           const followBtn = document.getElementById("followBtn");
           followBtn.style.display = "inline-block";
-          const isF = await readOnlyContract.methods.getIsFollowing(userAccount, userAddr).call();
+          const isF = await readOnlyContract2.methods.getIsFollowing(userAccount, userAddr).call();
           followBtn.textContent = isF ? "Unfollow" : "Follow";
           followBtn.onclick = () => toggleFollow(userAddr, !isF);
         }
         if (parseInt(p[6], 10) > 0) {
-          const pinnedPost = await readOnlyContract.methods.getPost(p[6]).call();
+          const pinnedPost = await readOnlyContract2.methods.getPost(p[6]).call();
           document.getElementById("userPinnedContent").innerHTML = `
             <div class="postItem" onclick="window.location.hash='post${pinnedPost[0]}'">
               <div class="postHeader">
@@ -1906,9 +1913,9 @@
       const feed = document.getElementById("userFeed");
       while (visibleCount < limit && userCurrentPostCursor > 0) {
         try {
-          const globalId = await readOnlyContract.methods.getGlobalPostId(userAddr, userCurrentPostCursor).call();
+          const globalId = await readOnlyContract2.methods.getGlobalPostId(userAddr, userCurrentPostCursor).call();
           userCurrentPostCursor--;
-          const post = await readOnlyContract.methods.getPost(globalId).call();
+          const post = await readOnlyContract1.methods.getPost(globalId).call();
           if (post[11]) continue;
           visibleCount++;
           const div = document.createElement("div");
@@ -2010,7 +2017,7 @@
             <p id="myStats"></p>
           </div>
         `;
-        const stats = await readOnlyContract.methods.getUserStats(userAccount).call();
+        const stats = await readOnlyContract1.methods.getUserStats(userAccount).call();
         document.getElementById("myStats").textContent =
           stats[0] + " Posts - " + stats[2] + " Followers - " + stats[3] + " Following | Joined: " + formatTimestampZ(basic[2]);
         myCurrentPostCursor = parseInt(stats[0], 10);
@@ -2038,8 +2045,8 @@
       let limit = 10;
       while (limit > 0 && myCurrentPostCursor > 0) {
         try {
-          const globalId = await readOnlyContract.methods.getGlobalPostId(userAccount, myCurrentPostCursor).call();
-          const post = await readOnlyContract.methods.getPost(globalId).call();
+          const globalId = await readOnlyContract1.methods.getGlobalPostId(userAccount, myCurrentPostCursor).call();
+          const post = await readOnlyContract1.methods.getPost(globalId).call();
           const div = document.createElement("div");
           div.className = "postItem";
           div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
@@ -2116,10 +2123,10 @@
 
     async function loadPinnedPost() {
       try {
-        const profile = await readOnlyContract.methods.getUserProfile(userAccount).call();
+        const profile = await readOnlyContract2.methods.getUserProfile(userAccount).call();
         const pinnedId = parseInt(profile[6], 10);
         if (pinnedId > 0) {
-          const post = await readOnlyContract.methods.getPost(pinnedId).call();
+          const post = await readOnlyContract2.methods.getPost(pinnedId).call();
           if (window.location.hash === "#profile" || window.location.hash === ""){
             const container = document.getElementById("myPinnedPostContent");
             if (container) {
@@ -2187,7 +2194,7 @@
         await userContract.methods.createPost(text).send({ from: userAccount });
         showMessage("Post created.", false);
         document.getElementById("postContent").value = "";
-        const stats = await readOnlyContract.methods.getUserStats(userAccount).call();
+        const stats = await readOnlyContract1.methods.getUserStats(userAccount).call();
         myCurrentPostCursor = parseInt(stats[0], 10);
         document.getElementById("myPostsFeed").innerHTML = "";
         loadMyPosts();
@@ -2232,7 +2239,7 @@
       if (un.length < 5) {
         return showMessage("Username must be at least 5 characters long.", true);
       }
-      const existingAddr = await readOnlyContract.methods.getUserAddressByUsername(un).call();
+      const existingAddr = await readOnlyContract2.methods.getUserAddressByUsername(un).call();
       if (existingAddr !== "0x0000000000000000000000000000000000000000") return showMessage("Username already taken", true);
       try {
         await userContract.methods.createAccount(nn, un).send({ from: userAccount });
@@ -2260,7 +2267,7 @@
       if (!isRegistered) return showMessage("Not registered", true);
       const val = document.getElementById("setUsername").value.trim();
       if (!val) return;
-      const existingAddr = await readOnlyContract.methods.getUserAddressByUsername(val).call();
+      const existingAddr = await readOnlyContract1.methods.getUserAddressByUsername(val).call();
       if(existingAddr !== "0x0000000000000000000000000000000000000000") return showMessage("Username already taken", true);
       try {
         await userContract.methods.changeUsername(val).send({ from: userAccount });
@@ -2322,9 +2329,9 @@
       if (!addr) return { displayName: "" };
       if (userProfileCache[addr]) return userProfileCache[addr];
       try {
-        const basic = await readOnlyContract.methods.getUserBasic(addr).call();
+        const basic = await readOnlyContract1.methods.getUserBasic(addr).call();
         const username = basic[1];
-        const p = await readOnlyContract.methods.getUserProfile(addr).call();
+        const p = await readOnlyContract2.methods.getUserProfile(addr).call();
         const display = `${p[0]} (@${username})`;
         const obj = { displayName: display, usernameOnly: username, profilePic: p[4] };
         userProfileCache[addr] = obj;
@@ -2356,12 +2363,12 @@
     }
     async function loadRecentlyJoined() {
       try {
-        const total = await readOnlyContract.methods.getTotalUsers().call();
+        const total = await readOnlyContract2.methods.getTotalUsers().call();
         const recentContainer = document.getElementById("recentlyJoinedContent");
         recentContainer.innerHTML = "";
         let count = 0;
         for(let i = total; i > 0 && count < 5; i--) {
-          const addr = await readOnlyContract.methods.getUserAddressById(i).call();
+          const addr = await readOnlyContract2.methods.getUserAddressById(i).call();
           if(addr === "0x0000000000000000000000000000000000000000") continue;
           const user = await getUserDisplayName(addr);
           const div = document.createElement("div");
@@ -2383,15 +2390,15 @@
     }
     async function loadRecentComments(userAddr) {
       try {
-        const total = await readOnlyContract.methods.getUserCommentCount(userAddr).call();
+        const total = await readOnlyContract2.methods.getUserCommentCount(userAddr).call();
         const container = document.getElementById("recentComments");
         container.innerHTML = "";
         let count = 0;
         for(let i = total; i > 0 && count < 10; i--) {
-          let result = await readOnlyContract.methods.getUserComment(userAddr, i).call();
+          let result = await readOnlyContract2.methods.getUserComment(userAddr, i).call();
           const globalPostId = result[0];
           const commentId = result[1];
-          const commentData = await readOnlyContract.methods.getComment(globalPostId, commentId).call();
+          const commentData = await readOnlyContract1.methods.getComment(globalPostId, commentId).call();
           if(commentData[7]) continue;
           const commenter = await getUserDisplayName(commentData[3]);
           let commentHTML = `
