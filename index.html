@@ -951,6 +951,8 @@
         <h3>Resources</h3>
         <a href="#zether">Zether Official</a>
         <a href="blockchain" target="_blank">Zether Blockchain</a>
+        <a href="tokenlab" target="_blank">Zether Token Lab</a>
+        <a href="bridge" target="_blank">Zether Bridge</a>
         <a href="https://zether.forum/" target="_blank">Zether Forum</a>
         <a href="bet" target="_blank">Zether Bets</a>
         <a href="https://zthscan.com/" target="_blank">Block Explorer</a>
@@ -1585,7 +1587,7 @@
         </a>
       `;
       return `<div class="repostBlock">
-                <p><em>${reposterNote}</em></p>
+                <p><em>${linkify(reposterNote)}</em></p>
                 ${originalHTML}
               </div>`;
     }
