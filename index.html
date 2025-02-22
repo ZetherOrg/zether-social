@@ -1594,6 +1594,7 @@
 
     /* =================== Edit Functions =================== */
     async function loadEditPost(postId) {
+      let isRepost = 0;
       try {
         const post = await readOnlyContract1.methods.getPost(postId).call();
         if (post[0] == 0 || post[11]) {
@@ -1601,6 +1602,7 @@
           return;
         }
         if (post[8]) {
+          isRepost = 1;
           let reposterNote = post[7].trim();
           if(reposterNote === "") {
             const reposterInfo = await getUserDisplayName(post[1]);
@@ -1634,11 +1636,19 @@
           showMessage("Post content cannot be empty.", true);
           return;
         }
-        try {
-          await userContract.methods.editPost(postId, newContent).send({ from: userAccount });
-          showMessage("Post updated.", false);
-          window.location.hash = "post" + postId;
-        } catch(e) { showMessage("Error editing post: " + e.message, true); }
+        if (isRepost == 1) {
+          try {
+            await userContract.methods.editRepost(postId, newContent).send({ from: userAccount });
+            showMessage("Repost updated.", false);
+            window.location.hash = "post" + postId;
+          } catch(e) { showMessage("Error editing post: " + e.message, true); }
+        } else {
+          try {
+            await userContract.methods.editPost(postId, newContent).send({ from: userAccount });
+            showMessage("Post updated.", false);
+            window.location.hash = "post" + postId;
+          } catch(e) { showMessage("Error editing post: " + e.message, true); }
+        }
       });
     }
     async function loadEditComment(globalPostId, commentId) {
