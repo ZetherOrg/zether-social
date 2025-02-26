@@ -1043,14 +1043,38 @@
       }
     }
     
+    function shortenUrl(url) {
+      try {
+        // Parse the URL using the built-in URL constructor
+        const parsed = new URL(url);
+        const host = parsed.hostname;
+        // Remove the leading slash from pathname
+        let path = parsed.pathname.replace(/^\//, "");
+        // If the path is long, shorten it (here we use 7 as threshold)
+        if (path.length > 7) {
+          const firstPart = path.substring(0, 3);
+          const lastPart = path.substring(path.length - 3);
+          path = firstPart + "..." + lastPart;
+        }
+        // Optionally, include the query string if needed
+        return host + (path ? "/" + path : "");
+      } catch (e) {
+        // Fallback: if URL constructor fails, simply truncate the string
+        if (url.length > 25) {
+          return url.substr(0, 10) + "..." + url.substr(url.length - 10);
+        }
+        return url;
+      }
+    }
+
     function linkify(text) {
       if (!text) return "";
       const urlRegex = /(\b(https?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]))/ig;
       return text.replace(urlRegex, function(url) {
-        return `<a href="${url}" target="_blank">${url}</a>`;
+        return `<a href="${url}" target="_blank">${shortenUrl(url)}</a>`;
       });
     }
-    
+
     function formatMarkdown(text) {
       if (!text) return "";
   
