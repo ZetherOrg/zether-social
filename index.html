@@ -716,6 +716,39 @@
       border-bottom: 1px solid #e1e8ed;
     }
 
+    .resources-section {
+      display: grid;
+      gap: 20px;
+    }
+
+    .resources-section h3 {
+      grid-column: 1 / -1;
+      text-align: center;
+    }
+
+    .resource-category {
+      text-align: center;
+    }
+
+    .resource-category h4 {
+      margin-bottom: 10px;
+      color: #1da1f3;
+    }
+
+    .resource-category a {
+      padding: 1px 7px 3px 7px;
+      border-radius: 5px;
+      text-decoration: none;
+      color: #14171a;
+      transition: background 0.2s, transform 0.2s;
+      text-align: center;
+    }
+
+    .resource-category a:hover {
+      background: #e0f3ff;
+      transform: translateY(-2px);
+    }
+
     /* ------------------- Footer ------------------- */
     footer {
       position: fixed;
@@ -947,17 +980,37 @@
         <h3>Recently Joined</h3>
         <div id="recentlyJoinedContent"></div>
       </div>
-      <div class="panel faqLinks" style="margin-top:20px;">
-        <h3>Resources</h3>
-        <a href="#zether">Zether Official</a>
-        <a href="blockchain" target="_blank">Zether Blockchain</a>
-        <a href="tokenlab" target="_blank">Zether Token Lab</a>
-        <a href="bridge" target="_blank">Zether Bridge</a>
-        <a href="https://zether.forum/" target="_blank">Zether Forum</a>
-        <a href="bet" target="_blank">Zether Bets</a>
-        <a href="https://zthscan.com/" target="_blank">Block Explorer</a>
-        <a href="faq">FAQ</a>
+      
+    <div class="panel resources-section" style="margin-top:20px;">
+      <h3>Resources</h3>
+      <div class="resource-category">
+        <h4>Blockchain</h4>
+        <a href="blockchain" target="_blank">About</a></li> | 
+        <a href="https://zthscan.com/" target="_blank">Explorer</a>
       </div>
+      <div class="resource-category">
+        <h4>Ecosystem</h4>
+        <a href="bridge" target="_blank">Bridge</a> | 
+        <a href="farm" target="_blank">Farm</a> | 
+        <a href="bet" target="_blank">Bets</a> | 
+        <a href="tokenlab" target="_blank">Token Lab</a>
+      </div>
+      <div class="resource-category">
+        <h4>Community</h4>
+        <a href="#zether">Official</a> | 
+        <a href="https://zether.forum/" target="_blank">Forum</a> | 
+        <a href="https://x.com/ZetherOrg" target="_blank">X</a> | 
+        <a href="https://discord.gg/rdvTu2Ks7S" target="_blank">Discord</a> | 
+        <a href="https://t.me/ZetherOrg" target="_blank">Telegram</a> | 
+        <a href="https://bitcointalk.org/index.php?topic=5515921" target="_blank">Bitcointalk</a>
+      </div>
+      <div class="resource-category">
+        <h4>Other</h4>
+        <a href="faq">FAQ</a> | 
+        <a href="https://github.com/ZetherOrg" target="_blank">Github</a>
+      </div>
+    </div>
+
     </div>
   </div>
 
@@ -977,9 +1030,11 @@
       const el = document.getElementById(id);
       if (el) { el.addEventListener(event, handler); }
     }
+    
     function refreshPage() {
       window.location.reload();
     }
+    
     function getAvatarHTML(author) {
       if (author.profilePic && author.profilePic.trim() !== "") {
         return `<img class="postAvatar" src="${author.profilePic}" alt="Avatar" onerror="this.onerror=null;this.style.display='none';" />`;
@@ -987,6 +1042,7 @@
         return `<div class="avatarFallback">${author.displayName ? author.displayName.charAt(0).toUpperCase() : '?'}</div>`;
       }
     }
+    
     function linkify(text) {
       if (!text) return "";
       const urlRegex = /(\b(https?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]))/ig;
@@ -994,17 +1050,42 @@
         return `<a href="${url}" target="_blank">${url}</a>`;
       });
     }
+    
+    function formatMarkdown(text) {
+      if (!text) return "";
+  
+      // Code blocks: ```code```
+      text = text.replace(/```([\s\S]*?)```/g, function(match, p1) {
+        return `<pre><code>${p1.trim()}</code></pre>`;
+      });
+  
+      // Inline code: `code`
+      text = text.replace(/`([^`]+)`/g, function(match, p1) {
+        return `<code>${p1}</code>`;
+      });
+  
+      // Bold text: **text**
+      text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  
+      // Italic text: *text*
+      text = text.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+  
+      return text;
+    }
+    
     function showLoader() { document.getElementById('loader').style.display = 'flex'; }
     function hideLoader() { document.getElementById('loader').style.display = 'none'; }
     function formatTimestamp(ts) { return new Date(ts * 1000).toLocaleString('en-GB'); }
     function formatTimestampZ(ts) { return new Date(ts * 1000).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }); }
     function shortAddress(addr) { return addr ? addr.slice(0,6) + "..." + addr.slice(-4) : ""; }
+    
     function showMessage(msg, isError) {
       const box = document.getElementById("messageBox");
       box.style.backgroundColor = isError ? "#e0245e" : "#17bf63";
       document.getElementById("messageText").textContent = msg;
       box.style.display = "block";
     }
+    
     function hideMessage() { document.getElementById("messageBox").style.display = "none"; }
 
     /* =================== Configuration Constants =================== */
@@ -1241,7 +1322,7 @@
                   <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
                 </div>
               </div>
-              <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+              <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
               <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
             `;
             feed.appendChild(div);
@@ -1279,7 +1360,7 @@
                 <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
               </div>
             </div>
-            <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+            <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
             <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
           `;
           feed.appendChild(div);
@@ -1309,7 +1390,7 @@
         if (post[8]) {
           postContentHTML = await renderRepost(post);
         } else {
-          postContentHTML = linkify(post[7]);
+          postContentHTML = formatMarkdown(linkify(post[7]));
         }
         // Build optionsHTML if the user owns the post and it is not hidden.
         let optionsHTML = "";
@@ -1400,7 +1481,7 @@
         commentHTML += `
               </div>
             </div>
-            <div><p>${linkify(cData[2])}</p></div>
+            <div><p>${formatMarkdown(linkify(cData[2]))}</p></div>
             <div class="statsLine">Likes: ${cData[4]} | Dislikes: ${cData[5]}</div>
           </div>
         `;
@@ -1466,7 +1547,7 @@
           commentHTML += `
                   </div>
                 </div>
-                <div><p>${linkify(cData[2])}</p></div>
+                <div><p>${formatMarkdown(linkify(cData[2]))}</p></div>
                 <div class="statsLine">Likes: ${cData[4]} | Dislikes: ${cData[5]}</div>
               </div>
             </div>
@@ -1581,13 +1662,13 @@
                 </div>
               </div>
             </div>
-            <div class="postText"><p>${linkify(originalPost[7])}</p></div>
+            <div class="postText"><p>${formatMarkdown(linkify(originalPost[7]))}</p></div>
             <div class="statsLine">Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]}</div>
           </div>
         </a>
       `;
       return `<div class="repostBlock">
-                <p><em>${linkify(reposterNote)}</em></p>
+                <p><em>${formatMarkdown(linkify(reposterNote))}</em></p>
                 ${originalHTML}
               </div>`;
     }
@@ -1621,7 +1702,7 @@
                 </div>
               </div>
             </div>
-            <div class="postText"><p>${linkify(originalPost[7])}</p></div>
+            <div class="postText"><p>${formatMarkdown(linkify(originalPost[7]))}</p></div>
             <div class="statsLine">Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]}</div>
           `;
           document.getElementById("originalPostQuote").style.display = "block";
@@ -1691,7 +1772,7 @@
                 </div>
               </div>
             </div>
-            <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+            <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
             <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
           </div>
         `;
@@ -1804,7 +1885,7 @@
                 <b>${commenter.displayName}</b>
                 has commented on post <span><b>#${globalPostId}</b></span>:
               </p>
-              <p><i>${linkify(commentData[2])}</i></p>
+              <p><i>${formatMarkdown(linkify(commentData[2]))}</i></p>
               <span style="font-size:0.8rem; color:#657786;">${formatTimestamp(commentData[6])}</span>
             </a>
           `;
@@ -1896,7 +1977,7 @@
                     <span class="reactionBtn" onclick="showShareOptions(${pinnedPost[0]}, event); event.stopPropagation();">🔗</span>
                 </div>
               </div>
-              <div class="postText"><p>${linkify(pinnedPost[7])}</p></div>
+              <div class="postText"><p>${formatMarkdown(linkify(pinnedPost[7]))}</p></div>
               <div class="statsLine">Likes: ${pinnedPost[5]} | Dislikes: ${pinnedPost[6]} | Comments: ${pinnedPost[4]}</div>
             </div>
           `;
@@ -1949,7 +2030,7 @@
                 <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
               </div>
             </div>
-            <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+            <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
             <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
           `;
           feed.appendChild(div);
@@ -2098,7 +2179,7 @@
                   <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
                 </div>
               </div>
-              <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+              <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
               <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
               ${optionsHTML}
           `;
@@ -2158,7 +2239,7 @@
                     <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
                     <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
                   </div>
-                  <div class="postText"><p>${ post[8] ? await renderRepost(post) : linkify(post[7]) }</p></div>
+                  <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
                   <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
                 </div>
               `;
@@ -2418,7 +2499,7 @@
               <b>${commenter.displayName} (@${commenter.usernameOnly})</b>
               has commented on post <a href="#post${globalPostId}">#${globalPostId}</a>:
             </p>
-            <p><i>${linkify(commentData[2])}</i></p>
+            <p><i>${formatMarkdown(linkify(commentData[2]))}</i></p>
             <span style="font-size:0.8rem; color:#657786;">${formatTimestamp(commentData[6])}</span>
           `;
           const commentDiv = document.createElement("div");
