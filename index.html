@@ -1323,7 +1323,7 @@
                 </div>
               </div>
               <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
-              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
             `;
             feed.appendChild(div);
             checkPostReaction(post[0], div);
@@ -1361,7 +1361,7 @@
               </div>
             </div>
             <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
-            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
           `;
           feed.appendChild(div);
           checkPostReaction(post[0], div);
@@ -1431,7 +1431,7 @@
                 </div>
               </div>
               <div class="postText"><p>${postContentHTML}</p></div>
-              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
             </div>
           </div>
         `;
@@ -1663,7 +1663,7 @@
               </div>
             </div>
             <div class="postText"><p>${formatMarkdown(linkify(originalPost[7]))}</p></div>
-            <div class="statsLine">Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]}</div>
+            <div class="statsLine">Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]} | Reposts: ${originalPost[10]}</div>
           </div>
         </a>
       `;
@@ -1703,7 +1703,7 @@
               </div>
             </div>
             <div class="postText"><p>${formatMarkdown(linkify(originalPost[7]))}</p></div>
-            <div class="statsLine">Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]}</div>
+            <div class="statsLine">Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]} | Reposts: ${originalPost[10]}</div>
           `;
           document.getElementById("originalPostQuote").style.display = "block";
         } else {
@@ -1773,7 +1773,7 @@
               </div>
             </div>
             <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
-            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
           </div>
         `;
       } catch(e) { showMessage("Error loading original post: " + e.message, true); }
@@ -1978,7 +1978,7 @@
                 </div>
               </div>
               <div class="postText"><p>${formatMarkdown(linkify(pinnedPost[7]))}</p></div>
-              <div class="statsLine">Likes: ${pinnedPost[5]} | Dislikes: ${pinnedPost[6]} | Comments: ${pinnedPost[4]}</div>
+              <div class="statsLine">Likes: ${pinnedPost[5]} | Dislikes: ${pinnedPost[6]} | Comments: ${pinnedPost[4]} | Reposts: ${pinnedPost[10]}</div>
             </div>
           `;
           document.getElementById("userPinnedPanel").style.display = "block";
@@ -2031,7 +2031,7 @@
               </div>
             </div>
             <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
-            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
           `;
           feed.appendChild(div);
           checkPostReaction(post[0], div);
@@ -2180,7 +2180,7 @@
                 </div>
               </div>
               <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
-              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
               ${optionsHTML}
           `;
           checkPostReaction(post[0], div);
@@ -2240,7 +2240,7 @@
                     <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
                   </div>
                   <div class="postText"><p>${ post[8] ? await renderRepost(post) : formatMarkdown(linkify(post[7])) }</p></div>
-                  <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+                  <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
                 </div>
               `;
               document.getElementById("myPinnedPostPanel").style.display = "block";
@@ -2264,7 +2264,7 @@
                     <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
                     <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
                   </div>
-                  <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]}</div>
+                  <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
                 </div>
               `;
               document.getElementById("userPinnedPanel").style.display = "block";
