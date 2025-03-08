@@ -18,7 +18,7 @@ Zether Social is fully decentralized. You can run the front-end locally by downl
 ## Contract Address
 
 Zether Social runs on the following smart contract:  
-**Contract Address**: 0x2481Ab84FFdfcc51DfE0E2B1F92A4cAAdAab1b4E
+**Contract Address**: 0xCF7cD887E1a6f39D2389cE4a961aAFe26A10B0a1
 
 
 ## License
