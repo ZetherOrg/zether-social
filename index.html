@@ -339,7 +339,7 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       transition: background var(--transition-speed), color var(--transition-speed);
     }
-    .panel h3 {
+    .panel h2, .panel h3 {
       padding-bottom: 10px;
       padding-left: 2px;
     }
@@ -380,6 +380,12 @@
     .updateRow label {
       min-width: 120px;
       font-weight: 500;
+    }
+    .updateRow input, .updateRow textarea {
+      width: 70%;
+    }
+    .updateRow button {
+      margin-top: 0;
     }
 
     /* ============================= MESSAGE BOX ============================= */
@@ -1017,10 +1023,10 @@
             <input type="text" id="setCoverPicture" />
             <button id="updateCoverPictureBtn">Update</button>
           </div>
-          <div class="updateRow">
-            <label for="setUsername">Change Username <small>(not recommended)</small></label>
+          <div class="updateRow" style="margin-top: 50px;">
+            <label for="setUsername">Username</label>
             <input type="text" id="setUsername" />
-            <button id="updateUsernameBtn">Update</button>
+            <button id="updateUsernameBtn" style="background: var(--danger);">Change</button>
           </div>
         </div>
       </div>
@@ -1986,8 +1992,6 @@
 
     /* =================== My Profile (Load 5 first, 5 on scroll) =================== */
     async function loadMyProfile() {
-      showLoader();
-      
       const header = document.getElementById("myProfileHeader");
       header.innerHTML = "";
 
@@ -2027,6 +2031,8 @@
       }
 
       try {
+        showLoader();
+        
         myProfileTabs.style.display = "flex";
         const p = await userContract.methods.getUserProfile(userAccount).call();
         const basic = await userContract.methods.getUserBasic(userAccount).call();
