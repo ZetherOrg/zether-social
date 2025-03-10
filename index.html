@@ -126,10 +126,13 @@
       transition: background 0.2s, border 0.2s;
       border: none;
     }
+    .postText pre {
+      padding-top: 10px;
+      padding-bottom: 15px;
+      line-height: 1.2;
+    }
     code {
-      background: var(--secondary);
-      border-radius: 5px;
-      padding: 0 3px;
+      color: #53979a;
       font-size: 0.9rem;
     }
     p {
@@ -143,12 +146,13 @@
     }
     ul {
       padding-left: 25px;
+      padding-bottom: 10px;
     }
     .postText h1,
     .postText h2,
     .postText h3,
     .postText h4 {
-      padding-bottom: 10px;
+      padding: 10px 0;
     }
 
     /* ============================= LOADER ============================= */
@@ -254,6 +258,10 @@
       padding: 20px;
       margin-top: 1px;
     }
+    .adsDiv {
+      display: block;
+      margin-top: 30px;
+    }
     @media (max-width: 1200px) {
       #topBar {
         justify-content: flex-start;
@@ -261,10 +269,15 @@
       #layout {
         grid-template-columns: 1fr;
       }
-      #sidebar {
+      .navMenuDiv {
         display: flex;
-        gap: 20px;
         justify-content: center;
+        gap: 20px;
+        margin-bottom: 10px;
+      }
+      .adsDiv {
+        margin-top: auto;
+        text-align: center;
       }
     }
 
@@ -344,7 +357,6 @@
     }
     .panel h2, .panel h3 {
       padding-bottom: 10px;
-      padding-left: 2px;
     }
     .panel input, .panel textarea {
       width: 100%;
@@ -877,10 +889,15 @@
   <div id="layout">
     <!-- Sidebar Navigation -->
     <div id="sidebar">
-      <a href="#home">🏠 Home</a>
-      <a href="#profile">👤 My Profile</a>
-      <a href="#settings">⚙️ Settings</a>
-      <a href="faucet">💰 Faucet</a>
+      <div class="navMenuDiv">
+        <a href="#home">🏠 Home</a>
+        <a href="#profile">👤 My Profile</a>
+        <a href="#settings">⚙️ Settings</a>
+        <a href="faucet">💰 Faucet</a>
+        </div>
+      <div class="adsDiv">
+        <!-- Ads go here -->
+      </div>
     </div>
 
     <!-- Main Content -->
