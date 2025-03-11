@@ -141,6 +141,7 @@
     p img {
       max-width: 30vw;
       height: auto;
+      margin-top: 10px;
       margin-bottom: 10px;
       display: block;
     }
@@ -534,12 +535,6 @@
     }
     .readMore {
       font-weight: bold;
-    }
-    .lineClamp {
-      display: -webkit-box;
-      -webkit-line-clamp: 5;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
 
     /* ============================= COMMENT BOX ============================= */
@@ -1486,42 +1481,86 @@
         isRegistered = await readOnlyContract.methods.isUserRegistered(userAccount).call();
       } catch(e) { isRegistered = false; }
     }
-function getTruncatedContent(postId, rawContent) {
-  // First format the raw content with markdown.
-  const formattedContent = formatMarkdown(rawContent);
+    
+    // Helper: Recursively traverse HTML nodes and build truncated HTML without breaking words.
+    function truncateHTML(html, maxChars) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+      let currentCount = 0;
+      let reachedLimit = false;
   
-  // Create a temporary element to measure the content’s natural height.
-  const tempEl = document.createElement('div');
-  // Ensure the element has the same styling as your rendered content.
-  tempEl.className = 'lineClamp';
-  // Hide it from view but let it render so we can measure its height.
-  tempEl.style.position = 'absolute';
-  tempEl.style.visibility = 'hidden';
-  tempEl.style.width = '100%';
-  tempEl.innerHTML = formattedContent;
-  document.body.appendChild(tempEl);
+      function traverse(node) {
+        if (reachedLimit) return "";
+    
+        let result = "";
+    
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent;
+          if (currentCount + text.length <= maxChars) {
+            currentCount += text.length;
+            return text;
+          } else {
+            // Take as much text as possible without breaking a word.
+            const remaining = maxChars - currentCount;
+            let subText = text.substring(0, remaining);
+            const lastSpace = subText.lastIndexOf(" ");
+            if (lastSpace !== -1) {
+              subText = subText.substring(0, lastSpace);
+            }
+            currentCount = maxChars;
+            reachedLimit = true;
+            return subText + "...";
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // Rebuild the element's opening tag with attributes.
+          let openTag = `<${node.nodeName.toLowerCase()}`;
+          for (let attr of node.attributes) {
+            openTag += ` ${attr.name}="${attr.value}"`;
+          }
+          openTag += ">";
+      
+          // Process children.
+          let innerHTML = "";
+          for (let i = 0; i < node.childNodes.length; i++) {
+            innerHTML += traverse(node.childNodes[i]);
+            if (reachedLimit) break;
+          }
+      
+          const closeTag = `</${node.nodeName.toLowerCase()}>`;
+          return openTag + innerHTML + closeTag;
+        }
+        return "";
+      }
   
-  // Get the computed line-height (assumed to be in pixels)
-  const computedStyle = window.getComputedStyle(tempEl);
-  const lineHeight = parseFloat(computedStyle.lineHeight);
-  
-  // Define the maximum allowed height as 5 lines.
-  const maxHeight = lineHeight * 5;
-  
-  // Prepare the output HTML.
-  let outputHTML = `<div class="lineClamp">${formattedContent}</div>`;
-  
-  // If the natural height is greater than the allowed max height, add "Read more".
-  if (tempEl.scrollHeight > maxHeight) {
-    outputHTML += `<br><a href="#post${postId}" class="readMore">Read more</a>`;
-  }
-  
-  // Clean up the temporary element.
-  document.body.removeChild(tempEl);
-  
-  return outputHTML;
-}
+      return traverse(tempDiv);
+    }
 
+    // Main function using the above helper.
+    function getTruncatedContent(postId, rawContent) {
+      // Convert raw markdown to HTML.
+      const formattedContent = formatMarkdown(rawContent);
+  
+      // Set maximum allowed characters.
+      const maxChars = 300; // adjust as needed
+  
+      // Create a temporary element to get the plain text.
+      const tempEl = document.createElement("div");
+      tempEl.innerHTML = formattedContent;
+      const plainText = tempEl.textContent || tempEl.innerText || "";
+  
+      let isTruncated = plainText.length > maxChars;
+      let truncatedHTML = formattedContent;
+      if (isTruncated) {
+        truncatedHTML = truncateHTML(formattedContent, maxChars);
+      }
+  
+      let outputHTML = `<div>${truncatedHTML}</div>`;
+      if (isTruncated) {
+        outputHTML += `<br><a href="#post${postId}" class="readMore">Read more</a>`;
+      }
+  
+      return outputHTML;
+    }
 
     /* =================== Home Feed (Load 5 first, 5 on scroll) =================== */
     async function loadHomeFeedInitial() {
