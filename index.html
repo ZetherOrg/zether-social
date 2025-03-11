@@ -269,6 +269,14 @@
       #layout {
         grid-template-columns: 1fr;
       }
+      #mainContent {
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      #rightSide {
+        max-height: 100%;
+        overflow-y: auto;
+      }
       .navMenuDiv {
         display: flex;
         justify-content: center;
@@ -518,6 +526,15 @@
     .postOptions button:hover {
       background: #1387c7;
     }
+    .readMore {
+      font-weight: bold;
+    }
+    .lineClamp {
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
     /* ============================= COMMENT BOX ============================= */
     #commentBox {
@@ -541,6 +558,9 @@
     */
 
     /* ============================= FALLBACKS & AVATARS ============================= */
+    #myProfileAvatar {
+      background: var(--border);
+    }
     .coverFallback {
       background: var(--border);
       width: 100%;
@@ -672,6 +692,19 @@
       border-bottom: 3px solid var(--accent);
       font-weight: 600;
     }
+    .shareProfileButton {
+      height: auto;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
     /* ============================= ROUTE PAGES ============================= */
     .routePage {
@@ -698,7 +731,7 @@
       background: var(--secondary);
     }
     .repostBlock p {
-      margin-bottom: 5px;
+      padding-bottom: 5px;
     }
 
     /* ============================= SHARE MODAL ============================= */
@@ -800,7 +833,13 @@
       align-items: center;
       gap: 10px;
     }
-
+    .recentUser a {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:inherit;
+    }
     .resources-section {
       display: grid;
       gap: 20px;
@@ -1076,7 +1115,7 @@
       <div class="routePage" id="repostPage">
         <div class="panel">
           <h3>Repost</h3>
-          <textarea id="repostContent" rows="2" placeholder="Add a comment (optional)"></textarea>
+          <textarea id="repostContent" rows="5" placeholder="Add a comment (optional)"></textarea>
           <div id="originalPostFrame" class="quotedFrame" style="margin-bottom:10px;"></div>
           <button id="submitRepostBtn">Repost</button>
         </div>
@@ -1437,6 +1476,42 @@
         isRegistered = await readOnlyContract.methods.isUserRegistered(userAccount).call();
       } catch(e) { isRegistered = false; }
     }
+function getTruncatedContent(postId, rawContent) {
+  // First format the raw content with markdown.
+  const formattedContent = formatMarkdown(rawContent);
+  
+  // Create a temporary element to measure the content’s natural height.
+  const tempEl = document.createElement('div');
+  // Ensure the element has the same styling as your rendered content.
+  tempEl.className = 'lineClamp';
+  // Hide it from view but let it render so we can measure its height.
+  tempEl.style.position = 'absolute';
+  tempEl.style.visibility = 'hidden';
+  tempEl.style.width = '100%';
+  tempEl.innerHTML = formattedContent;
+  document.body.appendChild(tempEl);
+  
+  // Get the computed line-height (assumed to be in pixels)
+  const computedStyle = window.getComputedStyle(tempEl);
+  const lineHeight = parseFloat(computedStyle.lineHeight);
+  
+  // Define the maximum allowed height as 5 lines.
+  const maxHeight = lineHeight * 5;
+  
+  // Prepare the output HTML.
+  let outputHTML = `<div class="lineClamp">${formattedContent}</div>`;
+  
+  // If the natural height is greater than the allowed max height, add "Read more".
+  if (tempEl.scrollHeight > maxHeight) {
+    outputHTML += `<br><a href="#post${postId}" class="readMore">Read more</a>`;
+  }
+  
+  // Clean up the temporary element.
+  document.body.removeChild(tempEl);
+  
+  return outputHTML;
+}
+
 
     /* =================== Home Feed (Load 5 first, 5 on scroll) =================== */
     async function loadHomeFeedInitial() {
@@ -1600,6 +1675,11 @@
         // Render exactly one comment
         commentsPanel.innerHTML += commentHTML;
         
+        const commentEl = document.getElementById("comment-" + commentId);
+        if (commentEl) {
+          checkCommentReaction(postId, commentId, commentEl);
+        }
+        
         // Disable infinite scroll in this scenario
         window.removeEventListener("scroll", handleCommentsWindowScroll);
       } catch(e) {
@@ -1671,6 +1751,12 @@
             commentsPanel.innerHTML += html;
             // Mark as loaded
             loadedComments[postId].add(i);
+            
+            const commentId = cData[1];
+            const commentEl = document.getElementById("comment-" + commentId);
+            if (commentEl) {
+              checkCommentReaction(postId, commentId, commentEl);
+            }
           }
         } catch (err) {
           console.log("Comment error on #", i, err);
@@ -1740,7 +1826,10 @@
       div.className = "postItem";
       div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
 
-      let contentHTML = post[8] ? await renderRepost(post) : formatMarkdown(post[7]);
+      let contentHTML = post[8]
+        ? await renderRepost(post)
+        : getTruncatedContent(post[0], post[7]);
+      
       div.innerHTML = `
         <div class="postHeader">
           <div class="authorInfo">
@@ -1778,7 +1867,7 @@
         const newReaction = (currentReaction === reaction) ? "none" : reaction;
         await userContract.methods.reactToPost(postId, newReaction).send({ from: userAccount });
         showMessage("Post reaction updated!", false);
-        loadSinglePost(postId);
+        checkPostReaction(postId, container);
       } catch(e) {
         showMessage("Error reacting to post: " + e.message, true);
       }
@@ -1791,7 +1880,12 @@
         const newReaction = (currentReaction === reaction) ? "none" : reaction;
         await userContract.methods.reactToComment(postId, commentId, newReaction).send({ from: userAccount });
         showMessage("Comment reaction updated!", false);
-        loadSinglePost(postId);
+        // Get the comment container by its id (set in buildCommentHTML)
+        const commentContainer = document.getElementById("comment-" + commentId);
+        if (commentContainer) {
+          // Call checkCommentReaction to update the UI
+          checkCommentReaction(postId, commentId, commentContainer);
+        }
       } catch(e) {
         showMessage("Error reacting to comment: " + e.message, true);
       }
@@ -1809,6 +1903,21 @@
         else if (reaction === "dislike" && dislikeBtn) dislikeBtn.classList.add("highlight");
       } catch(e) { console.log(e); }
     }
+    async function checkCommentReaction(postId, commentId, container) {
+      if (!userAccount) return;
+      try {
+        const likeBtn = container.querySelector(".reactionBtn.like");
+        const dislikeBtn = container.querySelector(".reactionBtn.dislike");
+        if (likeBtn) likeBtn.classList.remove("highlight");
+        if (dislikeBtn) dislikeBtn.classList.remove("highlight");
+
+        const reaction = await readOnlyContract.methods.getUserReactionOnComment(postId, commentId, userAccount).call();
+        if (reaction === "like" && likeBtn) likeBtn.classList.add("highlight");
+        else if (reaction === "dislike" && dislikeBtn) dislikeBtn.classList.add("highlight");
+      } catch (e) {
+        console.log(e);
+      }
+    }
     async function renderRepost(post) {
       let reposterNote = (post[7] || "").trim();
       const reposterInfo = await getUserDisplayName(post[1]);
@@ -1819,6 +1928,9 @@
       if (!originalPost[0]) return `<i>Original post not found.</i>`;
 
       const originalAuthor = await getUserDisplayName(originalPost[1]);
+      
+      const originalContentHTML = getTruncatedContent(post[9], originalPost[7]);
+      
       const originalHTML = `
         <a href="#post${post[9]}" style="text-decoration: none; color: inherit">
           <div class="quotedFrame">
@@ -1831,7 +1943,7 @@
                 </div>
               </div>
             </div>
-            <div class="postText"><p>${formatMarkdown(originalPost[7])}</p></div>
+            <div class="postText"><p>${originalContentHTML}</p></div>
             <div class="statsLine">
               Likes: ${originalPost[5]} | Dislikes: ${originalPost[6]} | Comments: ${originalPost[4]} | Reposts: ${originalPost[10]}
             </div>
@@ -1839,7 +1951,7 @@
         </a>
       `;
       return `<div class="repostBlock">
-                <p><em>${formatMarkdown(reposterNote)}</em></p>
+                <p><em>${getTruncatedContent(post[0], reposterNote)}</em></p>
                 ${originalHTML}
               </div>`;
     }
@@ -2070,11 +2182,11 @@
               <div class="avatarContainer">
                 ${
                   p[4]
-                    ? `<img id="myProfileAvatar" src="${p[4]}" alt="My Avatar" style="background: var(--border);">`
+                    ? `<img id="myProfileAvatar" src="${p[4]}" alt="My Avatar">`
                     : `<div id="myAvatarFallback" class="avatarFallback">${p[0]?.charAt(0).toUpperCase() || ""}</div>`
                 }
               </div>
-              <button onclick="shareProfile()" style="height: auto; position: absolute; top: 10px; right: 10px; background: var(--accent); color: #fff; border: none; padding: 5px 10px; border-radius: 7px; cursor: pointer; font-weight: 600;">
+              <button onclick="shareProfile()" class="shareProfileButton">
                 Share Profile
               </button>
             </div>
@@ -2228,7 +2340,10 @@
         `;
       }
 
-      let contentHTML = post[8] ? await renderRepost(post) : formatMarkdown(post[7]);
+      let contentHTML = post[8]
+        ? await renderRepost(post)
+        : getTruncatedContent(post[0], post[7]);
+    
       div.innerHTML = `
         <div class="postHeader">
           <div class="authorInfo">
@@ -2405,6 +2520,11 @@
           const pinnedPost = await readOnlyContract.methods.getPost(p[6]).call();
           if (pinnedPost[0]) {
             const pinnedAuthor = await getUserDisplayName(userAddr);
+            
+            let contentHTML = pinnedPost[8]
+                  ? await renderRepost(pinnedPost)
+                  : getTruncatedContent(pinnedPost[0], pinnedPost[7]);
+                  
             userPinnedContent.innerHTML = `
               <div class="postItem" onclick="window.location.hash='post${pinnedPost[0]}'">
                 <div class="postHeader">
@@ -2421,7 +2541,7 @@
                     <span class="reactionBtn shareBtn" onclick="showShareOptions(${pinnedPost[0]}, event); event.stopPropagation();">🔗</span>
                   </div>
                 </div>
-                <div class="postText"><p>${formatMarkdown(pinnedPost[7])}</p></div>
+                <div class="postText"><p>${contentHTML}</p></div>
                 <div class="statsLine">Likes: ${pinnedPost[5]} | Dislikes: ${pinnedPost[6]} | Comments: ${pinnedPost[4]} | Reposts: ${pinnedPost[10]}</div>
               </div>
             `;
@@ -2523,7 +2643,10 @@
       div.className = "postItem";
       div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
 
-      const repostHTML = post[8] ? await renderRepost(post) : formatMarkdown(post[7]);
+      let contentHTML = post[8]
+        ? await renderRepost(post)
+        : getTruncatedContent(post[0], post[7]);
+      
       div.innerHTML = `
         <div class="postHeader">
           <div class="authorInfo">
@@ -2543,7 +2666,7 @@
             <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
           </div>
         </div>
-        <div class="postText"><p>${repostHTML}</p></div>
+        <div class="postText"><p>${contentHTML}</p></div>
         <div class="statsLine">
           Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}
         </div>
@@ -2656,7 +2779,11 @@
               const container = document.getElementById("myPinnedPostContent");
               if (container) {
                 const me = await getUserDisplayName(userAccount);
-                const contentHTML = post[8] ? await renderRepost(post) : formatMarkdown(post[7]);
+                
+                let contentHTML = post[8]
+                  ? await renderRepost(post)
+                  : getTruncatedContent(post[0], post[7]);
+                
                 container.innerHTML = `
                   <div class="postItem" onclick="window.location.hash='post${post[0]}'">
                     <div class="postHeader">
@@ -2667,11 +2794,11 @@
                           <div class="postDate">${formatTimestamp(post[3])}</div>
                         </div>
                       </div>
+                      <div class="reactionRow">
+                        <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+                        <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                        <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
                     </div>
-                    <div class="reactionRow">
-                      <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-                      <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-                      <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
                     </div>
                     <div class="postText"><p>${contentHTML}</p></div>
                     <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
@@ -2879,7 +3006,7 @@
           const div = document.createElement("div");
           div.className = "recentUser";
           div.innerHTML = `
-            <a href="#${user.usernameOnly ? user.usernameOnly : addr}" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+            <a href="#${user.usernameOnly ? user.usernameOnly : addr}">
               ${getAvatarHTML(user)}
               <span>${user.displayName}</span>
             </a>
