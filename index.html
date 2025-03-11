@@ -765,7 +765,7 @@
 
     /* ============================= REACTION HIGHLIGHT ============================= */
     .highlight {
-      background: var(--secondary) !important;
+      background: var(--accent) !important;
     }
 
     /* ============================= ADDITIONAL CLASSES ============================= */
@@ -1686,7 +1686,6 @@
       // If missing or hidden, skip
       if (!cData[0] || cData[7]) return "";
 
-      const highlightClass = highlight ? " highlight" : "";
       const commentId = cData[1];
       const authorAddr = cData[3];
       const authorDisplay = await getUserDisplayName(authorAddr);
@@ -1694,7 +1693,7 @@
       // Entire DIV leads to #postXX/#commentYY
       // Reaction/edit/hide buttons have event.stopPropagation() so they don't trigger that.
       return `
-        <div class="postItem${highlightClass}" 
+        <div class="postItem" 
              id="comment-${commentId}"
              onclick="window.location.hash='post${postId}/#comment${commentId}'">
           <div class="postHeader">
