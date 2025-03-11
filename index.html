@@ -513,7 +513,7 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .postOptions button {
+    .postOptions button, .postHiddenMessage button {
       background: var(--accent);
       color: #fff;
       border-radius: 20px;
@@ -523,7 +523,13 @@
       align-items: center;
       gap: 5px;
     }
+    .postHiddenMessage button {
+      margin-top: 10px;
+    }
     .postOptions button:hover {
+      background: #1387c7;
+    }
+    .postHiddenMessage button:hover {
       background: #1387c7;
     }
     .readMore {
@@ -1191,6 +1197,10 @@
       window.history.back();
     }
 
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     document.getElementById("cancelEditPostBtn").addEventListener("click", goBack);
     document.getElementById("cancelEditCommentBtn").addEventListener("click", goBack);
     
@@ -1594,6 +1604,7 @@ function getTruncatedContent(postId, rawContent) {
         }
         if (post[11]) {
           document.getElementById("postPanel").innerHTML = "<p>Post is hidden.</p>";
+          hideLoader();
           return;
         }
 
@@ -1611,8 +1622,8 @@ function getTruncatedContent(postId, rawContent) {
         }
         const ownerEditHide = (userAccount && userAccount.toLowerCase() === post[1].toLowerCase())
           ? `
-            <a class="reactionBtn edit" href="#editpost-${post[0]}">✏️</a>
-            <span class="reactionBtn hide" onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️</span>
+            <a class="reactionBtn edit" title="Edit" href="#editpost-${post[0]}">✏️</a>
+            <span class="reactionBtn hide" title="Hide" onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️</span>
             ${pinOptions}
           `
           : "";
@@ -1630,9 +1641,9 @@ function getTruncatedContent(postId, rawContent) {
                   </div>
                 </div>
                 <div class="reactionRow">
-                  <span class="reactionBtn like" onclick="reactToPost(${postId}, 'like')">👍</span>
-                  <span class="reactionBtn dislike" onclick="reactToPost(${postId}, 'dislike')">👎</span>
-                  <span class="reactionBtn shareBtn" onclick="showShareOptions(${postId}, event)">🔗</span>
+                  <span class="reactionBtn like" title="Like" onclick="reactToPost(${postId}, 'like')">👍</span>
+                  <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${postId}, 'dislike')">👎</span>
+                  <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${postId}, event)">🔗</span>
                   ${ownerEditHide}
                 </div>
               </div>
@@ -1692,6 +1703,9 @@ function getTruncatedContent(postId, rawContent) {
       const commentsPanel = document.getElementById("commentsPanel");
       commentsPanel.innerHTML = "<h3>Comments</h3>";
 
+      // Remove any previous scroll listener from window
+      window.removeEventListener("scroll", handleCommentsWindowScroll);
+
       readOnlyContract.methods.getPostCommentCount(postId).call().then(total => {
         const totalComments = parseInt(total, 10);
         if (totalComments <= 0) {
@@ -1723,16 +1737,23 @@ function getTruncatedContent(postId, rawContent) {
 
       // If user scrolled near the bottom of the entire page
       if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 50) {
-        commentsLoading[postId] = true;
         await loadMoreComments(postId, 5);
         commentsLoading[postId] = false;
+        window.addEventListener("scroll", handleCommentsWindowScroll);
       }
     }
 
     // loadMoreComments appends new comments, letting the page grow
     async function loadMoreComments(postId, batchSize) {
+      // If already loading comments for this post, exit early.
+      if (commentsLoading[postId]) return;
+      commentsLoading[postId] = true;
+
       let last = commentLastId[postId];
-      if (!last || last < 1) return;
+      if (!last || last < 1) {
+        commentsLoading[postId] = false;
+        return;
+      }
 
       const commentsPanel = document.getElementById("commentsPanel");
       const start = last;
@@ -1740,7 +1761,6 @@ function getTruncatedContent(postId, rawContent) {
       if (end < 1) end = 1;
 
       for (let i = start; i >= end; i--) {
-        // Skip duplicates if we've loaded this comment before
         if (!loadedComments[postId]) loadedComments[postId] = new Set();
         if (loadedComments[postId].has(i)) continue;
 
@@ -1748,15 +1768,9 @@ function getTruncatedContent(postId, rawContent) {
           const cData = await readOnlyContract.methods.getComment(postId, i).call();
           const html = await buildCommentHTML(postId, cData, false);
           if (html) {
-            commentsPanel.innerHTML += html;
-            // Mark as loaded
+            // Use insertAdjacentHTML to append without overwriting the existing content
+            commentsPanel.insertAdjacentHTML('beforeend', html);
             loadedComments[postId].add(i);
-            
-            const commentId = cData[1];
-            const commentEl = document.getElementById("comment-" + commentId);
-            if (commentEl) {
-              checkCommentReaction(postId, commentId, commentEl);
-            }
           }
         } catch (err) {
           console.log("Comment error on #", i, err);
@@ -1764,6 +1778,7 @@ function getTruncatedContent(postId, rawContent) {
       }
 
       commentLastId[postId] = end - 1;
+      commentsLoading[postId] = false;
     }
 
     /* =================== Building comment HTML (clickable) =================== */
@@ -1791,23 +1806,15 @@ function getTruncatedContent(postId, rawContent) {
               </div>
             </div>
             <div class="reactionRow">
-              <span class="reactionBtn like"
-                    onclick="reactToComment(${postId}, ${commentId}, 'like'); event.stopPropagation();">
-                👍
-              </span>
-              <span class="reactionBtn dislike"
-                    onclick="reactToComment(${postId}, ${commentId}, 'dislike'); event.stopPropagation();">
-                👎
-              </span>
+              <span class="reactionBtn like" title="Like" onclick="reactToComment(${postId}, ${commentId}, 'like'); event.stopPropagation();">👍</span>
+              <span class="reactionBtn dislike" title="Dislike" onclick="reactToComment(${postId}, ${commentId}, 'dislike'); event.stopPropagation();">👎</span>
               ${
                 userAccount && userAccount.toLowerCase() === authorAddr.toLowerCase()
                   ? `
                     <a href="#editcomment-${postId}-${commentId}" onclick="event.stopPropagation();">
-                      <span class="reactionBtn">✏️</span>
+                      <span class="reactionBtn" title="Edit">✏️</span>
                     </a>
-                    <span class="reactionBtn" onclick="toggleHideComment(${postId}, ${commentId}, true); event.stopPropagation();">
-                      👁️
-                    </span>
+                    <span class="reactionBtn" title="Hide" onclick="toggleHideComment(${postId}, ${commentId}, true); event.stopPropagation();">👁️</span>
                   `
                   : ``
               }
@@ -1844,9 +1851,9 @@ function getTruncatedContent(postId, rawContent) {
             </div>
           </div>
           <div class="reactionRow">
-            <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-            <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-            <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
           </div>
         </div>
         <div class="postText"><p>${contentHTML}</p></div>
@@ -2354,9 +2361,9 @@ function getTruncatedContent(postId, rawContent) {
             </div>
           </div>
           <div class="reactionRow">
-            <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-            <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-            <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
           </div>
         </div>
         <div class="postText">
@@ -2536,9 +2543,9 @@ function getTruncatedContent(postId, rawContent) {
                     </div>
                   </div>
                   <div class="reactionRow">
-                    <span class="reactionBtn like" onclick="reactToPost(${pinnedPost[0]}, 'like'); event.stopPropagation();">👍</span>
-                    <span class="reactionBtn dislike" onclick="reactToPost(${pinnedPost[0]}, 'dislike'); event.stopPropagation();">👎</span>
-                    <span class="reactionBtn shareBtn" onclick="showShareOptions(${pinnedPost[0]}, event); event.stopPropagation();">🔗</span>
+                    <span class="reactionBtn like" title="Like" onclick="reactToPost(${pinnedPost[0]}, 'like'); event.stopPropagation();">👍</span>
+                    <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${pinnedPost[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                    <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${pinnedPost[0]}, event); event.stopPropagation();">🔗</span>
                   </div>
                 </div>
                 <div class="postText"><p>${contentHTML}</p></div>
@@ -2661,9 +2668,9 @@ function getTruncatedContent(postId, rawContent) {
             </div>
           </div>
           <div class="reactionRow">
-            <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-            <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-            <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
           </div>
         </div>
         <div class="postText"><p>${contentHTML}</p></div>
@@ -2795,9 +2802,9 @@ function getTruncatedContent(postId, rawContent) {
                         </div>
                       </div>
                       <div class="reactionRow">
-                        <span class="reactionBtn like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-                        <span class="reactionBtn dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-                        <span class="reactionBtn shareBtn" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+                        <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
+                        <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
+                        <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
                     </div>
                     </div>
                     <div class="postText"><p>${contentHTML}</p></div>
