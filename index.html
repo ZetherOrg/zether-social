@@ -1326,6 +1326,15 @@
       window.addEventListener('hashchange', handleRouting);
       handleRouting();
       initTheme();
+      
+      // Auto-reload home feed every 60 seconds if still on home page
+      if (window.location.hash === "" || window.location.hash === "#home") {
+        setInterval(() => {
+          if (window.location.hash === "" || window.location.hash === "#home") {
+            loadHomeFeedInitial();
+          }
+        }, 60000); // 60000ms = 60 seconds
+      }
     });
 
     /* =================== UI Initialization =================== */
