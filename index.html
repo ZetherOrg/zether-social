@@ -493,6 +493,9 @@
       gap: 10px;
       align-items: center;
     }
+    .reactionRow a:hover {
+      text-decoration: none;
+    }
     .reactionBtn {
       cursor: pointer;
       padding: 6px 10px;
@@ -514,15 +517,13 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .postOptions button, .postHiddenMessage button {
+    .postOptions button, .postHiddenMessage button, .activityItem button, .genBtn {
+      height: auto !important;
       background: var(--accent);
       color: #fff;
       border-radius: 20px;
-      padding: 5px 15px;
+      padding: 5px 15px !important;
       font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
     }
     .postHiddenMessage button {
       margin-top: 10px;
@@ -935,7 +936,7 @@
         <a href="#profile">👤 My Profile</a>
         <a href="#settings">⚙️ Settings</a>
         <a href="faucet">💰 Faucet</a>
-        </div>
+      </div>
       <div class="adsDiv">
         <!-- Ads go here -->
       </div>
@@ -1211,9 +1212,13 @@
     }
 
     function formatMarkdown(text) {
-      const html = marked.parse(text || "");
-      // ensure links open in new tab
-      return html.replace(/<a /g, '<a target="_blank" ');
+      // Replace @mentions in the raw text.
+      text = text.replace(/(^|\s)@([A-Za-z0-9_]+)/g, function(match, preceding, username) {
+        return preceding + '<a href="#' + username + '">@' + username + '</a>';
+      });
+      let html = marked.parse(text || "");
+      html = html.replace(/<a /g, '<a target="_blank" ');
+      return html;
     }
 
     function showLoader() { document.getElementById('loader').style.display = 'flex'; }
@@ -1649,6 +1654,7 @@
         const post = await readOnlyContract.methods.getPost(postId).call();
         if (!post[0]) {
           document.getElementById("postPanel").innerHTML = "<p>Post not found.</p>";
+          hideLoader();
           return;
         }
         if (post[11]) {
@@ -1717,6 +1723,7 @@
         hideLoader();
       } catch (e) {
         document.getElementById("postPanel").innerHTML = "<p>Post not found.</p>";
+        hideLoader();
       }
     }
 
@@ -1833,8 +1840,29 @@
     /* =================== Building comment HTML (clickable) =================== */
     async function buildCommentHTML(postId, cData, highlight = false) {
       // cData = [exists, commentId, text, authorAddr, likes, dislikes, timestamp, hidden]
-      // If missing or hidden, skip
-      if (!cData[0] || cData[7]) return "";
+      
+      if (!cData[0]) return "";
+  
+      // If the comment is hidden…
+      if (cData[7]) {
+        // If the current user is the comment owner, show an Unhide button.
+        if (userAccount && userAccount.toLowerCase() === cData[3].toLowerCase()) {
+          return `
+            <div class="postItem" id="comment-${cData[1]}" style="border: 1px dashed #ccc; padding: 10px;">
+              <div class="postText">
+                <p>This comment is hidden.
+                  <button onclick="toggleHideComment(${postId}, ${cData[1]}, false); event.stopPropagation();" style="margin-top: 0;" class="genBtn">👀 Unhide Comment</button>
+                </p>
+              </div>
+            </div>
+          `;
+        } else {
+          // For other users hide the comment.
+          return "";
+        }
+      }
+  
+  // Otherwise, build the full comment HTML.
 
       const commentId = cData[1];
       const authorAddr = cData[3];
@@ -1850,7 +1878,7 @@
             <div class="authorInfo">
               ${getAvatarHTML(authorDisplay)}
               <div class="authorDetails">
-                <span class="authorName">@${authorDisplay.usernameOnly}</span>
+                <a href="#${authorDisplay.usernameOnly}"><span class="authorName">@${authorDisplay.usernameOnly}</span></a>
                 <div class="postDate">${formatTimestamp(cData[6])}</div>
               </div>
             </div>
@@ -2467,9 +2495,10 @@
           const globalPostId = info[0];
           const commentId = info[1];
           if (parseInt(globalPostId,10)===0) continue;
-
           const cData = await readOnlyContract.methods.getComment(globalPostId, commentId).call();
-          if (!cData[0] || cData[7]) continue;
+          // Only skip if the comment doesn't exist
+          if (!cData[0]) continue;
+          // Do NOT skip hidden comments now; let appendMyComment handle them.
           await appendMyComment(cData, globalPostId);
         } catch(e) {
           console.log("Error loading my comment #", i, e);
@@ -2484,15 +2513,34 @@
       const commenter = await getUserDisplayName(cData[3]);
       const div = document.createElement("div");
       div.className = "activityItem";
-      div.innerHTML = `
-        <a href="#post${globalPostId}/#comment${cData[1]}" style="text-decoration:none; color:inherit;">
+
+      let innerHTML = "";
+      if (cData[7]) { // comment is hidden
+        if (userAccount && userAccount.toLowerCase() === cData[3].toLowerCase()) {
+          // Owner sees an Unhide button
+          innerHTML = `
+            <p class="commentTitle">
+              <b>${commenter.displayName}</b> commented on post <a href="#${globalPostId}"><b>#${globalPostId}</b></a>:
+            </p>
+            <p><i>${formatMarkdown(cData[2])}</i></p>
+            <p><i>This comment is hidden.</i> <button onclick="toggleHideComment(${globalPostId}, ${cData[1]}, false); event.stopPropagation();">👀 Unhide Comment</button></p>
+            <span style="font-size:0.8rem; opacity:0.7;">${formatTimestamp(cData[6])}</span>
+          `;
+        } else {
+          // Other users see a message and a link
+          innerHTML = ``;
+        }
+      } else {
+        innerHTML = `
           <p class="commentTitle">
-            <b>${commenter.displayName}</b> commented on post <b>#${globalPostId}</b>:
+            <b>${commenter.displayName}</b> commented on post <a href="#${globalPostId}"><b>#${globalPostId}</b></a>:
           </p>
           <p><i>${formatMarkdown(cData[2])}</i></p>
           <span style="font-size:0.8rem; opacity:0.7;">${formatTimestamp(cData[6])}</span>
-        </a>
-      `;
+        `;
+      }
+  
+      div.innerHTML = `<a href="#post${globalPostId}/#comment${cData[1]}" style="text-decoration:none; color:inherit;">${innerHTML}</a>`;
       myCommentsFeed.appendChild(div);
     }
 
@@ -2527,6 +2575,7 @@
         const userAddr = await readOnlyContract.methods.getUserAddressByUsername(username).call();
         if (userAddr === "0x0000000000000000000000000000000000000000") {
           userFeed.innerHTML = "<p>User not found.</p>";
+          hideLoader();
           return;
         }
         currentProfileUserAddr = userAddr;
@@ -2791,7 +2840,7 @@
       div.innerHTML = `
         <a href="#post${globalPostId}/#comment${cData[1]}" style="text-decoration:none; color:inherit;">
           <p class="commentTitle">
-            <b>${commenter.displayName}</b> commented on post <b>#${globalPostId}</b>:
+            <b>${commenter.displayName}</b> commented on post <a href="#${globalPostId}"><b>#${globalPostId}</b></a>:
           </p>
           <p><i>${formatMarkdown(cData[2])}</i></p>
           <span style="font-size:0.8rem; opacity:0.7;">${formatTimestamp(cData[6])}</span>
