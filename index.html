@@ -1241,11 +1241,11 @@
       chainId: "0xAE97B",
       chainName: "Zether Mainnet",
       nativeCurrency: { name: "ZTH", symbol: "ZTH", decimals: 18 },
-      rpcUrls: ["https://rpc.zthscan.com/"],
+      rpcUrls: ["https://rpc.zether.org/"],
       blockExplorerUrls: ["https://zthscan.com/"]
     };
 
-    const rpcUrl = "https://rpc.zthscan.com/";
+    const rpcUrl = "https://rpc.zether.org/";
 
     /* =================== Contract ABIs (from abi.js) =================== */
     // Use the global: const CONTRACT_ABI
@@ -1571,7 +1571,7 @@
   
       let outputHTML = `<div>${truncatedHTML}</div>`;
       if (isTruncated) {
-        outputHTML += `<br><a href="#post${postId}" class="readMore">Read more</a>`;
+        outputHTML += `<br><a href="#post${postId}" class="readMore" onclick="event.stopPropagation();">Read more</a>`;
       }
   
       return outputHTML;
@@ -1691,7 +1691,7 @@
                 <div class="authorInfo">
                   ${getAvatarHTML(authorDisplay)}
                   <div class="authorDetails">
-                    <span class="authorName"><a href="#${authorDisplay.usernameOnly}">${authorDisplay.displayName}</a></span>
+                    <a href="#${authorDisplay.usernameOnly}"><span class="authorName">${authorDisplay.displayName}</span></a>
                     <div class="postDate">${formatTimestamp(post[3])}</div>
                   </div>
                 </div>
@@ -1862,7 +1862,7 @@
         }
       }
   
-  // Otherwise, build the full comment HTML.
+      // Otherwise, build the full comment HTML.
 
       const commentId = cData[1];
       const authorAddr = cData[3];
@@ -1919,11 +1919,7 @@
           <div class="authorInfo">
             ${getAvatarHTML(authorDisplay)}
             <div class="authorDetails">
-              <span class="authorName">
-                <a href="#${authorDisplay.usernameOnly}" onclick="event.stopPropagation();">
-                  ${authorDisplay.displayName}
-                </a>
-              </span>
+              <a href="#${authorDisplay.usernameOnly}"><span class="authorName">${authorDisplay.displayName}</span></a>
               <div class="postDate">${formatTimestamp(post[3])}</div>
             </div>
           </div>
@@ -2016,13 +2012,13 @@
       const originalContentHTML = getTruncatedContent(post[9], originalPost[7]);
       
       const originalHTML = `
-        <a href="#post${post[9]}" style="text-decoration: none; color: inherit">
+        <a href="#post${post[9]}" style="text-decoration: none; color: inherit;" onclick="event.stopPropagation();">
           <div class="quotedFrame">
             <div class="postHeader">
               <div class="authorInfo">
                 ${getAvatarHTML(originalAuthor)}
                 <div class="authorDetails">
-                  <span class="authorName">${originalAuthor.displayName}</span>
+                  <span class="authorName">${originalAuthor.usernameOnly}</span>
                   <div class="postDate">${formatTimestamp(originalPost[3])}</div>
                 </div>
               </div>
@@ -2107,7 +2103,7 @@
                 <div class="authorInfo">
                   ${getAvatarHTML(originalAuthor)}
                   <div class="authorDetails">
-                    <span class="authorName"><a href="#${originalAuthor.usernameOnly}">${originalAuthor.displayName}</a></span>
+                    <a href="#${originalAuthor.usernameOnly}"><span class="authorName">${originalAuthor.displayName}</span></a>
                     <div class="postDate">${formatTimestamp(originalPost[3])}</div>
                   </div>
                 </div>
@@ -2181,7 +2177,7 @@
               <div class="authorInfo">
                 ${getAvatarHTML(authorDisp)}
                 <div class="authorDetails">
-                  <span class="authorName">${authorDisp.displayName}</span>
+                  <span class="authorName">${authorDisp.usernameOnly}</span>
                   <div class="postDate">${formatTimestamp(post[3])}</div>
                 </div>
               </div>
@@ -2400,7 +2396,7 @@
         if (post[0] == window.pinnedPostId) {
           optionsHTML = `
             <div class="postOptions">
-              <a href="#editpost-${post[0]}"><button>✏️</button></a>
+              <a href="#editpost-${post[0]}"><button>Edit ✏️</button></a>
               <button onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️ Hide</button>
               <button onclick="unpinMyPost(); event.stopPropagation();">✂️ Unpin</button>
             </div>
@@ -2408,7 +2404,7 @@
         } else {
           optionsHTML = `
             <div class="postOptions">
-              <a href="#editpost-${post[0]}"><button>✏️</button></a>
+              <a href="#editpost-${post[0]}"><button>Edit ✏️</button></a>
               <button onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️ Hide</button>
               <button onclick="pinMyPost(${post[0]}); event.stopPropagation();">📌 Pin</button>
             </div>
@@ -2433,7 +2429,7 @@
           <div class="authorInfo">
             ${getAvatarHTML(myDisplay)}
             <div class="authorDetails">
-              <span class="authorName">${myDisplay.displayName}</span>
+              <a href="#profile"><span class="authorName">${myDisplay.displayName}</span></a>
               <div class="postDate">${formatTimestamp(post[3])}</div>
             </div>
           </div>
@@ -2520,7 +2516,7 @@
           // Owner sees an Unhide button
           innerHTML = `
             <p class="commentTitle">
-              <b>${commenter.displayName}</b> commented on post <a href="#${globalPostId}"><b>#${globalPostId}</b></a>:
+              <b>${commenter.displayName}</b> commented on post <a href="#post${globalPostId}"><b>#${globalPostId}</b></a>:
             </p>
             <p><i>${formatMarkdown(cData[2])}</i></p>
             <p><i>This comment is hidden.</i> <button onclick="toggleHideComment(${globalPostId}, ${cData[1]}, false); event.stopPropagation();">👀 Unhide Comment</button></p>
@@ -2533,7 +2529,7 @@
       } else {
         innerHTML = `
           <p class="commentTitle">
-            <b>${commenter.displayName}</b> commented on post <a href="#${globalPostId}"><b>#${globalPostId}</b></a>:
+            <b>${commenter.displayName}</b> commented on post <b>#${globalPostId}</b>:
           </p>
           <p><i>${formatMarkdown(cData[2])}</i></p>
           <span style="font-size:0.8rem; opacity:0.7;">${formatTimestamp(cData[6])}</span>
@@ -2636,7 +2632,7 @@
                   <div class="authorInfo">
                     ${getAvatarHTML(pinnedAuthor)}
                     <div class="authorDetails">
-                      <span class="authorName">${pinnedAuthor.displayName}</span>
+                      <a href="#${pinnedAuthor.usernameOnly}"><span class="authorName">${pinnedAuthor.displayName}</span></a>
                       <div class="postDate">${formatTimestamp(pinnedPost[3])}</div>
                     </div>
                   </div>
@@ -2757,11 +2753,7 @@
           <div class="authorInfo">
             ${getAvatarHTML(authorDisplay)}
             <div class="authorDetails">
-              <span class="authorName">
-                <a href="#${authorDisplay.usernameOnly}" onclick="event.stopPropagation();">
-                  ${authorDisplay.displayName}
-                </a>
-              </span>
+              <a href="#${authorDisplay.usernameOnly}"><span class="authorName">${authorDisplay.displayName}</span></a>
               <div class="postDate">${formatTimestamp(post[3])}</div>
             </div>
           </div>
@@ -2840,7 +2832,7 @@
       div.innerHTML = `
         <a href="#post${globalPostId}/#comment${cData[1]}" style="text-decoration:none; color:inherit;">
           <p class="commentTitle">
-            <b>${commenter.displayName}</b> commented on post <a href="#${globalPostId}"><b>#${globalPostId}</b></a>:
+            <b>${commenter.displayName}</b> commented on post <b>#${globalPostId}</b>:
           </p>
           <p><i>${formatMarkdown(cData[2])}</i></p>
           <span style="font-size:0.8rem; opacity:0.7;">${formatTimestamp(cData[6])}</span>
@@ -2895,7 +2887,7 @@
                       <div class="authorInfo">
                         ${getAvatarHTML(me)}
                         <div class="authorDetails">
-                          <span class="authorName">${me.displayName}</span>
+                          <a href="#profile"><span class="authorName">${me.displayName}</span></a>
                           <div class="postDate">${formatTimestamp(post[3])}</div>
                         </div>
                       </div>
