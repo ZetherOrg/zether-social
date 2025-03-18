@@ -1528,6 +1528,11 @@
             return subText + "...";
           }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // Special handling for <br>: do not add a closing tag.
+          if (node.nodeName.toLowerCase() === "br") {
+            return "<br>";
+          }
+          
           // Rebuild the element's opening tag with attributes.
           let openTag = `<${node.nodeName.toLowerCase()}`;
           for (let attr of node.attributes) {
