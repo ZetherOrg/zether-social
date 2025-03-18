@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1687,26 +1686,24 @@
 
         document.getElementById("postPanel").innerHTML = `
           <h3>Post #${postId}</h3>
-          <div>
-            <div class="postItem" style="cursor:auto;">
-              <div class="postHeader">
-                <div class="authorInfo">
-                  ${getAvatarHTML(authorDisplay)}
-                  <div class="authorDetails">
-                    <a href="#${authorDisplay.usernameOnly}"><span class="authorName">${authorDisplay.displayName}</span></a>
-                    <div class="postDate">${formatTimestamp(post[3])}</div>
-                  </div>
-                </div>
-                <div class="reactionRow">
-                  <span class="reactionBtn like" title="Like" onclick="reactToPost(${postId}, 'like')">👍</span>
-                  <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${postId}, 'dislike')">👎</span>
-                  <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${postId}, event)">🔗</span>
-                  ${ownerEditHide}
+          <div class="postItem" style="cursor:auto;" id="post-${postId}">
+            <div class="postHeader">
+              <div class="authorInfo">
+                ${getAvatarHTML(authorDisplay)}
+                <div class="authorDetails">
+                  <a href="#${authorDisplay.usernameOnly}"><span class="authorName">${authorDisplay.displayName}</span></a>
+                  <div class="postDate">${formatTimestamp(post[3])}</div>
                 </div>
               </div>
-              <div class="postText"><p>${postContentHTML}</p></div>
-              <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
+              <div class="reactionRow">
+                <span class="reactionBtn like" title="Like" onclick="reactToPost(${postId}, 'like')">👍</span>
+                <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${postId}, 'dislike')">👎</span>
+                <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${postId}, event)">🔗</span>
+                ${ownerEditHide}
+              </div>
             </div>
+            <div class="postText"><p>${postContentHTML}</p></div>
+            <div class="statsLine">Likes: ${post[5]} | Dislikes: ${post[6]} | Comments: ${post[4]} | Reposts: ${post[10]}</div>
           </div>
         `;
         checkPostReaction(postId, document.querySelector("#postPanel .postItem"));
@@ -1873,9 +1870,7 @@
       // Entire DIV leads to #postXX/#commentYY
       // Reaction/edit/hide buttons have event.stopPropagation() so they don't trigger that.
       return `
-        <div class="postItem" 
-             id="comment-${commentId}"
-             onclick="window.location.hash='post${postId}/#comment${commentId}'">
+        <div class="postItem" id="comment-${commentId}" onclick="window.location.hash='post${postId}/#comment${commentId}'">
           <div class="postHeader">
             <div class="authorInfo">
               ${getAvatarHTML(authorDisplay)}
@@ -1910,6 +1905,7 @@
       const authorDisplay = await getUserDisplayName(post[1]);
       const div = document.createElement("div");
       div.className = "postItem";
+      div.id = "post-" + post[0];
       div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
 
       let contentHTML = post[8]
@@ -1949,7 +1945,12 @@
         const newReaction = (currentReaction === reaction) ? "none" : reaction;
         await userContract.methods.reactToPost(postId, newReaction).send({ from: userAccount });
         showMessage("Post reaction updated!", false);
-        checkPostReaction(postId, container);
+        // Get the post container by its id
+        const container = document.getElementById("post-" + postId);
+        if (container) {
+          // Call container to update the UI
+          checkPostReaction(postId, container);
+        }
       } catch(e) {
         showMessage("Error reacting to post: " + e.message, true);
       }
@@ -2391,6 +2392,7 @@
       const myDisplay = await getUserDisplayName(userAccount);
       const div = document.createElement("div");
       div.className = "postItem";
+      div.id = "post-" + post[0];
       div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
 
       let optionsHTML = "";
@@ -2744,6 +2746,7 @@
       const authorDisplay = await getUserDisplayName(post[1]);
       const div = document.createElement("div");
       div.className = "postItem";
+      div.id = "post-" + post[0];
       div.addEventListener('click', () => { window.location.hash = "post" + post[0]; });
 
       let contentHTML = post[8]
