@@ -35,6 +35,9 @@
 
   <!-- Marked for markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- Font Awesome! -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
 
   <style>
     /* ============================= THEME VARIABLES ============================= */
@@ -104,8 +107,11 @@
       padding: 0; 
       box-sizing: border-box;
     }
+    html {
+      scroll-behavior: smooth;
+    }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
       color: var(--text);
       padding-bottom: 50px;
@@ -342,6 +348,7 @@
       font-size: 1rem;
       background: var(--bg);
       color: var(--text);
+      text-align: center;
     }
     #searchBtn {
       background: var(--accent);
@@ -627,6 +634,7 @@
     #nicknameLine, #myNicknameLine {
       margin-top: 55px;
       margin-bottom: 5px;
+      padding-bottom: 0;
       font-size: 1.3rem;
       font-weight: 700;
     }
@@ -636,6 +644,9 @@
       margin-top: 7px;
       font-size: 0.95rem;
       opacity: 0.9;
+    }
+    #bioLine, #myBioLine {
+      padding-bottom: 0;
     }
     #followBtn {
       background: var(--accent);
@@ -829,14 +840,14 @@
       border-radius: 8px;
       margin-top: 10px;
     }
-    .recentUser {
+    .recentUser, .officialUser {
       padding: 10px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .recentUser a {
+    .recentUser a, .officialUser a {
       display:flex;
       align-items:center;
       gap:10px;
@@ -849,13 +860,11 @@
     }
     .resources-section h3 {
       grid-column: 1 / -1;
-      text-align: center;
     }
     .resource-category {
-      text-align: center;
+      
     }
-    .resource-category h4 {
-      margin-bottom: 10px;
+    .resource-category h3, #recentlyJoinedPanel h3 {
       color: var(--accent);
       font-weight: 600;
     }
@@ -873,6 +882,7 @@
       background: var(--accent);
       color: #fff;
       transform: translateY(-1px);
+      border-radius: 15px;
     }
 
     /* Make user/my comments scrollable for infinite load: */
@@ -930,13 +940,16 @@
   </div>
 
   <div id="layout">
+      
     <!-- Sidebar Navigation -->
     <div id="sidebar">
       <div class="navMenuDiv">
-        <a href="#home">🏠 Home</a>
-        <a href="#profile">👤 My Profile</a>
-        <a href="#settings">⚙️ Settings</a>
-        <a href="faucet">💰 Faucet</a>
+        <a href="#home"><i class="fas fa-home" style="padding-right: 5px;"></i>Home</a>
+        <a href="#profile"><i class="fas fa-user" style="padding-right: 5px;"></i>My Profile</a>
+        <a href="#settings"><i class="fas fa-gear" style="padding-right: 5px;"></i>Settings</a>
+        <a href="faq"><i class="fas fa-circle-question" style="padding-right: 5px;"></i>FAQ</a>
+        <a href="https://zether.org/faucet" target="_blank"><i class="fas fa-faucet-drip" style="padding-right: 5px;"></i>Faucet</a>
+        <a href="https://zether.org/" target="_blank"><i class="fas fa-circle-info" style="padding-right: 5px;"></i>Zether</a>
       </div>
       <div class="adsDiv">
         <!-- Ads go here -->
@@ -1004,7 +1017,7 @@
           <button id="followBtn" style="display:none;"></button>
         </div>
         <div id="userPinnedPanel" class="panel" style="display:none;">
-          <h3>Pinned Post 📌</h3>
+          <h3>Pinned Post <i class="fas fa-thumbtack"></i></h3>
           <div id="userPinnedContent"></div>
         </div>
         <!-- Profile Tabs -->
@@ -1032,7 +1045,7 @@
         </div>
         <!-- Pinned Post Panel for My Profile -->
         <div id="myPinnedPostPanel" class="panel" style="display: none;">
-          <h3>Pinned Post 📌</h3>
+          <h3>Pinned Post <i class="fas fa-thumbtack"></i></h3>
           <div id="myPinnedPostContent"></div>
         </div>
         <!-- My Profile Tabs -->
@@ -1067,7 +1080,7 @@
             <button id="updateAboutBtn">Update</button>
           </div>
           <div class="updateRow">
-            <label for="setWebsite">Website 🌐</label>
+            <label for="setWebsite">Website <i class="fas fa-globe"></i></label>
             <input type="text" id="setWebsite" />
             <button id="updateWebsiteBtn">Update</button>
           </div>
@@ -1129,45 +1142,26 @@
     <!-- Right Sidebar -->
     <div id="rightSide">
       <div id="searchSection">
-        <label>Search</label>
-        <input type="text" id="searchInput" placeholder="e.g. post123 or Zether" />
-        <button id="searchBtn">Go</button>
+        <input type="text" id="searchInput" placeholder="e.g. post123 or zether" />
+        <button id="searchBtn">Search</button>
+      </div>
+      <div class="panel resources-section" style="margin-bottom: 20px;">
+        <div class="resource-category">
+          <h3>Official Profiles</h3>
+          <div class="officialUser">
+            <a href="#zether">
+              <img class="postAvatar" src="https://zether.org/img/logo.png" alt="Zether" onerror="this.onerror=null;this.style.display='none';">
+              <span>Zether (@zether)</span>
+            </a>
+          </div>
+        </div>
       </div>
       <div id="recentlyJoinedPanel" class="panel">
         <h3>Recently Joined</h3>
         <div id="recentlyJoinedContent"></div>
       </div>
-      
-      <div class="panel resources-section" style="margin-top:20px;">
-        <h3>Resources</h3>
-        <div class="resource-category">
-          <h4>Blockchain</h4>
-          <a href="blockchain" target="_blank">About</a> | 
-          <a href="https://zthscan.com/" target="_blank">Explorer</a>
-        </div>
-        <div class="resource-category">
-          <h4>Ecosystem</h4>
-          <a href="bridge" target="_blank">Bridge</a> | 
-          <a href="farm" target="_blank">Farm</a> | 
-          <a href="bet" target="_blank">Bets</a> | 
-          <a href="tokenlab" target="_blank">Token Lab</a>
-        </div>
-        <div class="resource-category">
-          <h4>Community</h4>
-          <a href="#zether">Official</a> | 
-          <a href="https://zether.forum/" target="_blank">Forum</a> | 
-          <a href="https://x.com/ZetherOrg" target="_blank">X</a> | 
-          <a href="https://discord.gg/rdvTu2Ks7S" target="_blank">Discord</a> | 
-          <a href="https://t.me/ZetherOrg" target="_blank">Telegram</a> | 
-          <a href="https://bitcointalk.org/index.php?topic=5515921" target="_blank">Bitcointalk</a>
-        </div>
-        <div class="resource-category">
-          <h4>Other</h4>
-          <a href="faq">FAQ</a> | 
-          <a href="https://github.com/ZetherOrg" target="_blank">Github</a>
-        </div>
-      </div>
     </div>
+    
   </div>
 
   <!-- Footer -->
@@ -1676,15 +1670,15 @@
         let pinOptions = "";
         if (userAccount && userAccount.toLowerCase() === post[1].toLowerCase() && !post[11]) {
           if (postId == window.pinnedPostId) {
-            pinOptions = `<span class="reactionBtn" onclick="unpinMyPost(); event.stopPropagation();">✂️</span>`;
+            pinOptions = `<span class="reactionBtn" onclick="unpinMyPost(); event.stopPropagation();"><i class="fas fa-thumbtack-slash"></i></span>`;
           } else {
-            pinOptions = `<span class="reactionBtn" onclick="pinMyPost(${postId}); event.stopPropagation();">📌</span>`;
+            pinOptions = `<span class="reactionBtn" onclick="pinMyPost(${postId}); event.stopPropagation();"><i class="fas fa-thumbtack"></i></span>`;
           }
         }
         const ownerEditHide = (userAccount && userAccount.toLowerCase() === post[1].toLowerCase())
           ? `
-            <a class="reactionBtn edit" title="Edit" href="#editpost-${post[0]}">✏️</a>
-            <span class="reactionBtn hide" title="Hide" onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️</span>
+            <a class="reactionBtn edit" title="Edit" href="#editpost-${post[0]}"><i class="fas fa-pen"></i></a>
+            <span class="reactionBtn hide" title="Hide" onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();"><i class="fas fa-eye"></i>️</span>
             ${pinOptions}
           `
           : "";
@@ -1701,9 +1695,9 @@
                 </div>
               </div>
               <div class="reactionRow">
-                <span class="reactionBtn like" title="Like" onclick="reactToPost(${postId}, 'like')">👍</span>
-                <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${postId}, 'dislike')">👎</span>
-                <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${postId}, event)">🔗</span>
+                <span class="reactionBtn like" title="Like" onclick="reactToPost(${postId}, 'like')"><i class="fas fa-thumbs-up"></i></span>
+                <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${postId}, 'dislike')"><i class="fas fa-thumbs-down"></i></span>
+                <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${postId}, event)"><i class="fas fa-share"></i></span>
                 ${ownerEditHide}
               </div>
             </div>
@@ -1855,7 +1849,7 @@
             <div class="postItem" id="comment-${cData[1]}" style="border: 1px dashed #ccc; padding: 10px;">
               <div class="postText">
                 <p>This comment is hidden.
-                  <button onclick="toggleHideComment(${postId}, ${cData[1]}, false); event.stopPropagation();" style="margin-top: 0;" class="genBtn">👀 Unhide Comment</button>
+                  <button onclick="toggleHideComment(${postId}, ${cData[1]}, false); event.stopPropagation();" style="margin-top: 0;" class="genBtn"><i class="fas fa-eye-slash"></i> Unhide Comment</button>
                 </p>
               </div>
             </div>
@@ -1885,15 +1879,15 @@
               </div>
             </div>
             <div class="reactionRow">
-              <span class="reactionBtn like" title="Like" onclick="reactToComment(${postId}, ${commentId}, 'like'); event.stopPropagation();">👍</span>
-              <span class="reactionBtn dislike" title="Dislike" onclick="reactToComment(${postId}, ${commentId}, 'dislike'); event.stopPropagation();">👎</span>
+              <span class="reactionBtn like" title="Like" onclick="reactToComment(${postId}, ${commentId}, 'like'); event.stopPropagation();"><i class="fas fa-thumbs-up"></i></span>
+              <span class="reactionBtn dislike" title="Dislike" onclick="reactToComment(${postId}, ${commentId}, 'dislike'); event.stopPropagation();"><i class="fas fa-thumbs-down"></i></span>
               ${
                 userAccount && userAccount.toLowerCase() === authorAddr.toLowerCase()
                   ? `
                     <a href="#editcomment-${postId}-${commentId}" onclick="event.stopPropagation();">
-                      <span class="reactionBtn" title="Edit">✏️</span>
+                      <span class="reactionBtn" title="Edit"><i class="fas fa-pen"></i></span>
                     </a>
-                    <span class="reactionBtn" title="Hide" onclick="toggleHideComment(${postId}, ${commentId}, true); event.stopPropagation();">👁️</span>
+                    <span class="reactionBtn" title="Hide" onclick="toggleHideComment(${postId}, ${commentId}, true); event.stopPropagation();"><i class="fas fa-eye"></i>️</span>
                   `
                   : ``
               }
@@ -1927,9 +1921,9 @@
             </div>
           </div>
           <div class="reactionRow">
-            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();"><i class="fas fa-thumbs-up"></i></span>
+            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();"><i class="fas fa-thumbs-down"></i></span>
+            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();"><i class="fas fa-share"></i></span>
           </div>
         </div>
         <div class="postText"><p>${contentHTML}</p></div>
@@ -2284,12 +2278,12 @@
             <div style="display: flex; align-items: center; gap: 15px;">
               ${
                 p[3]
-                  ? `<p id="myLocationLine">📍 ${p[3]}</p>`
+                  ? `<p id="myLocationLine"><i class="fas fa-location-pin"></i> ${p[3]}</p>`
                   : ""
               }
               ${
                 p[2]
-                  ? `<p id="myWebsiteLine">🌐 <a href="${p[2].startsWith("http") ? p[2] : "http://${p[2]}" }" target="_blank">${p[2]}</a></p>`
+                  ? `<p id="myWebsiteLine"><i class="fas fa-globe"></i> <a href="${p[2].startsWith("http") ? p[2] : "http://${p[2]}" }" target="_blank">${p[2]}</a></p>`
                   : ""
               }
             </div>
@@ -2405,17 +2399,17 @@
         if (post[0] == window.pinnedPostId) {
           optionsHTML = `
             <div class="postOptions">
-              <a href="#editpost-${post[0]}"><button>Edit ✏️</button></a>
-              <button onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️ Hide</button>
-              <button onclick="unpinMyPost(); event.stopPropagation();">✂️ Unpin</button>
+              <a href="#editpost-${post[0]}"><button><i class="fas fa-pen"></i> Edit</button></a>
+              <button onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();"><i class="fas fa-eye"></i>️ Hide</button>
+              <button onclick="unpinMyPost(); event.stopPropagation();"><i class="fas fa-thumbtack-slash"></i> Unpin</button>
             </div>
           `;
         } else {
           optionsHTML = `
             <div class="postOptions">
-              <a href="#editpost-${post[0]}"><button>Edit ✏️</button></a>
-              <button onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();">👁️ Hide</button>
-              <button onclick="pinMyPost(${post[0]}); event.stopPropagation();">📌 Pin</button>
+              <a href="#editpost-${post[0]}"><button><i class="fas fa-pen"></i> Edit</button></a>
+              <button onclick="toggleHidePost(${post[0]}, true); event.stopPropagation();"><i class="fas fa-eye"></i>️ Hide</button>
+              <button onclick="pinMyPost(${post[0]}); event.stopPropagation();"><i class="fas fa-thumbtack"></i> Pin</button>
             </div>
           `;
         }
@@ -2424,7 +2418,7 @@
         optionsHTML = `
           <div class="postHiddenMessage">
             This post is hidden. 
-            <button onclick="toggleHidePost(${post[0]}, false); event.stopPropagation();">👀️ Unhide</button>
+            <button onclick="toggleHidePost(${post[0]}, false); event.stopPropagation();"><i class="fas fa-eye-slash"></i>️ Unhide</button>
           </div>
         `;
       }
@@ -2443,9 +2437,9 @@
             </div>
           </div>
           <div class="reactionRow">
-            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();"><i class="fas fa-thumbs-up"></i></span>
+            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();"><i class="fas fa-thumbs-down"></i></span>
+            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();"><i class="fas fa-share"></i></span>
           </div>
         </div>
         <div class="postText">
@@ -2528,7 +2522,7 @@
               <b>${commenter.displayName}</b> commented on post <a href="#post${globalPostId}"><b>#${globalPostId}</b></a>:
             </p>
             <p><i>${formatMarkdown(cData[2])}</i></p>
-            <p><i>This comment is hidden.</i> <button onclick="toggleHideComment(${globalPostId}, ${cData[1]}, false); event.stopPropagation();">👀 Unhide Comment</button></p>
+            <p><i>This comment is hidden.</i> <button onclick="toggleHideComment(${globalPostId}, ${cData[1]}, false); event.stopPropagation();"><i class="fas fa-eye-slash"></i> Unhide Comment</button></p>
             <span style="font-size:0.8rem; opacity:0.7;">${formatTimestamp(cData[6])}</span>
           `;
         } else {
@@ -2567,7 +2561,7 @@
       nicknameLine.textContent = "";
       usernameLine.textContent = "";
       bioLine.textContent = "";
-      locationLine.textContent = "";
+      locationLine.innerHTML = "";
       websiteLine.textContent = "";
       joinedDate.textContent = "";
       followerStats.textContent = "";
@@ -2592,11 +2586,11 @@
         nicknameLine.textContent = p[0];
         usernameLine.textContent = "@" + basic[1];
         if (p[1]) bioLine.textContent = p[1];
-        if (p[3]) locationLine.textContent = '📍 ' + p[3];
+        if (p[3]) locationLine.innerHTML = '<i class="fas fa-location-pin"></i> ' + p[3];
         if (p[2]) {
           let url = p[2];
           if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
-          websiteLine.innerHTML = '🌐 <a href="' + url + '" target="_blank">' + p[2] + '</a>';
+          websiteLine.innerHTML = '<i class="fas fa-globe"></i> <a href="' + url + '" target="_blank">' + p[2] + '</a>';
         }
         followerStats.textContent = stats[0] + " Posts - " + stats[2] + " Followers - " + stats[3] + " Following";
         joinedDate.textContent = "Joined " + new Date(parseInt(basic[2],10)*1000).toLocaleDateString('en-US', {year:'numeric', month:'long'});
@@ -2646,9 +2640,9 @@
                     </div>
                   </div>
                   <div class="reactionRow">
-                    <span class="reactionBtn like" title="Like" onclick="reactToPost(${pinnedPost[0]}, 'like'); event.stopPropagation();">👍</span>
-                    <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${pinnedPost[0]}, 'dislike'); event.stopPropagation();">👎</span>
-                    <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${pinnedPost[0]}, event); event.stopPropagation();">🔗</span>
+                    <span class="reactionBtn like" title="Like" onclick="reactToPost(${pinnedPost[0]}, 'like'); event.stopPropagation();"><i class="fas fa-thumbs-up"></i></span>
+                    <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${pinnedPost[0]}, 'dislike'); event.stopPropagation();"><i class="fas fa-thumbs-down"></i></span>
+                    <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${pinnedPost[0]}, event); event.stopPropagation();"><i class="fas fa-share"></i></span>
                   </div>
                 </div>
                 <div class="postText"><p>${contentHTML}</p></div>
@@ -2768,9 +2762,9 @@
             </div>
           </div>
           <div class="reactionRow">
-            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+            <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();"><i class="fas fa-thumbs-up"></i></span>
+            <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();"><i class="fas fa-thumbs-down"></i></span>
+            <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();"><i class="fas fa-share"></i></span>
           </div>
         </div>
         <div class="postText"><p>${contentHTML}</p></div>
@@ -2902,9 +2896,9 @@
                         </div>
                       </div>
                       <div class="reactionRow">
-                        <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();">👍</span>
-                        <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();">👎</span>
-                        <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();">🔗</span>
+                        <span class="reactionBtn like" title="Like" onclick="reactToPost(${post[0]}, 'like'); event.stopPropagation();"><i class="fas fa-thumbs-up"></i></span>
+                        <span class="reactionBtn dislike" title="Dislike" onclick="reactToPost(${post[0]}, 'dislike'); event.stopPropagation();"><i class="fas fa-thumbs-down"></i></span>
+                        <span class="reactionBtn shareBtn" title="Share" onclick="showShareOptions(${post[0]}, event); event.stopPropagation();"><i class="fas fa-share"></i></span>
                     </div>
                     </div>
                     <div class="postText"><p>${contentHTML}</p></div>
