@@ -152,6 +152,9 @@
       margin-bottom: 10px;
       display: block;
     }
+    i {
+      color: var(--text);
+    }
     ol, ul {
       padding-left: 25px;
       padding-bottom: 10px;
@@ -1678,9 +1681,9 @@
         let pinOptions = "";
         if (userAccount && userAccount.toLowerCase() === post[1].toLowerCase() && !post[11]) {
           if (postId == window.pinnedPostId) {
-            pinOptions = `<span class="reactionBtn" onclick="unpinMyPost(); event.stopPropagation();"><i class="fas fa-thumbtack-slash"></i></span>`;
+            pinOptions = `<span class="reactionBtn" title="Unpin" onclick="unpinMyPost(); event.stopPropagation();"><i class="fas fa-thumbtack-slash"></i></span>`;
           } else {
-            pinOptions = `<span class="reactionBtn" onclick="pinMyPost(${postId}); event.stopPropagation();"><i class="fas fa-thumbtack"></i></span>`;
+            pinOptions = `<span class="reactionBtn" title="Pin" onclick="pinMyPost(${postId}); event.stopPropagation();"><i class="fas fa-thumbtack"></i></span>`;
           }
         }
         const ownerEditHide = (userAccount && userAccount.toLowerCase() === post[1].toLowerCase())
