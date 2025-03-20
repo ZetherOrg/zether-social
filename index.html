@@ -864,10 +864,13 @@
     .resource-category {
       
     }
-    .resource-category h3, #recentlyJoinedPanel h3 {
+    .resource-category h3, #recentlyJoinedPanel h3, #statsPanel h3 {
       color: var(--accent);
       font-weight: 600;
     }
+    #statsPanel strong {
+       font-weight: 600;
+     }
     .resource-category a {
       padding: 2px 8px;
       border-radius: 5px;
@@ -1160,6 +1163,10 @@
         <h3>Recently Joined</h3>
         <div id="recentlyJoinedContent"></div>
       </div>
+      <div id="statsPanel" class="panel">
+        <h3>Platform Stats</h3>
+        <div id="statsContent"></div>
+      </div>
     </div>
     
   </div>
@@ -1323,6 +1330,7 @@
       }
 
       loadRecentlyJoined();
+      loadPlatformStats();
       window.addEventListener('hashchange', handleRouting);
       handleRouting();
       initTheme();
@@ -3114,6 +3122,20 @@
           `;
           recentContainer.appendChild(div);
           count++;
+        }
+      } catch(e) {
+        console.log("Error loading recently joined:", e);
+      }
+    }
+    async function loadPlatformStats() {
+      try {
+        const totalUsers = await readOnlyContract.methods.getTotalUsers().call();
+        const totalPosts = await readOnlyContract.methods.getGlobalPostCount().call();
+        const statsContainer = document.getElementById("statsContent");
+        statsContainer.innerHTML = "";
+        
+        if (totalUsers > 0 && totalPosts > 0) {
+          statsContainer.innerHTML = `<strong>Total Users:</strong> ${totalUsers}<br><strong>Total Posts:</strong> ${totalPosts}`;
         }
       } catch(e) {
         console.log("Error loading recently joined:", e);
